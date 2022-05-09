@@ -58,8 +58,6 @@ func initConfig() {
 		viper.AddConfigPath(filepath.Join(ios.UserHomeDir(), ".config", "starudream"))
 	}
 
-	_ = "1"
-
 	err := viper.ReadInConfig()
 	if _, ok := err.(viper.ConfigFileNotFoundError); ok && path != "" {
 		ierr.CheckErr(err)
