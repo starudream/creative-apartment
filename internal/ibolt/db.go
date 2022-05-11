@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/rs/zerolog/log"
 	"go.etcd.io/bbolt"
 )
 
@@ -36,12 +37,13 @@ func Init(xpath string) {
 func Close() {
 	if pool != nil {
 		pool.Close()
+		log.Info().Msg("[bolt] db closed")
 	}
 }
 
 type DB = bbolt.DB
 
-func X(fn func(*DB) error) error {
+func D(fn func(*DB) error) error {
 	conn, err := pool.Get(path)
 	if err != nil {
 		return err

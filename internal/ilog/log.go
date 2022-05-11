@@ -4,10 +4,16 @@ import (
 	"bytes"
 	"io"
 	slog "log"
+	"runtime/debug"
+	"strings"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
+
+func init() {
+	zerolog.ErrorStackMarshaler = func(err error) any { return strings.TrimSuffix(string(debug.Stack()), "\n") }
+}
 
 type levelWriter struct {
 	logger zerolog.Logger
@@ -42,9 +48,9 @@ func WrapError(err error, prefixes ...string) bool {
 		return true
 	}
 	if len(prefixes) > 0 && prefixes[0] != "" {
-		log.Logger.Error().CallerSkipFrame(2).Msgf("[%s] %v", prefixes[0], err)
+		log.Error().CallerSkipFrame(2).Msgf("[%s] %v", prefixes[0], err)
 	} else {
-		log.Logger.Error().CallerSkipFrame(2).Msgf("%v", err)
+		log.Error().CallerSkipFrame(2).Msgf("%v", err)
 	}
 	return false
 }

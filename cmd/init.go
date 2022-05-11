@@ -8,7 +8,6 @@ import (
 	"github.com/mattn/go-colorable"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/rs/zerolog/pkgerrors"
 	"github.com/spf13/cobra"
 	jww "github.com/spf13/jwalterweatherman"
 	"github.com/spf13/viper"
@@ -21,18 +20,17 @@ import (
 	"github.com/starudream/creative-apartment/internal/ios"
 )
 
-var path string
-
 func init() {
 	cobra.OnInitialize(initLogger, initConfig, initDB)
 
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "(env: SCA_DEBUG) show debug information")
 	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
 
-	rootCmd.PersistentFlags().StringVarP(&path, "path", "p", "", "(env: SCA_PATH) configuration file path")
+	rootCmd.PersistentFlags().StringP("path", "", "", "(env: SCA_PATH) configuration file path")
 	viper.BindPFlag("path", rootCmd.PersistentFlags().Lookup("path"))
 
-	rootCmd.AddCommand(runCmd)
+	rootCmd.PersistentFlags().IntP("port", "", 8089, "(env: SCA_PORT) http server port")
+	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
 }
 
 func initConfig() {
@@ -45,7 +43,7 @@ func initConfig() {
 	viper.SetDefault("debug", false)
 	viper.SetDefault("log.level", "INFO")
 
-	path = viper.GetString("path")
+	path := viper.GetString("path")
 
 	if path != "" {
 		viper.SetConfigFile(path)
@@ -63,17 +61,12 @@ func initConfig() {
 		ierr.CheckErr(err)
 	}
 
-	if path != "" {
-		path = filepath.Dir(path)
-	}
-	if v := viper.ConfigFileUsed(); v != "" {
-		path = filepath.Dir(v)
-	}
+	path = viper.ConfigFileUsed()
 	if path == "" {
-		path = filepath.Join(ios.UserHomeDir(), ".config", "starudream")
+		path = filepath.Join(ios.UserHomeDir(), ".config", "starudream", config.AppName+".yaml")
 	}
 
-	viper.SetConfigFile(filepath.Join(path, config.AppName+".yaml"))
+	viper.SetConfigFile(path)
 
 	level, err := zerolog.ParseLevel(strings.ToLower(viper.GetString("log.level")))
 	if err != nil || level == zerolog.NoLevel {
@@ -83,26 +76,25 @@ func initConfig() {
 	debug := viper.GetBool("debug")
 	if debug {
 		level = zerolog.DebugLevel
-		zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	}
 	zerolog.SetGlobalLevel(level)
 
 	if level < zerolog.NoLevel {
 		log.Logger = log.Output(zerolog.MultiLevelWriter(newConsoleWriter(), newFileWriter()))
 		if debug {
-			log.Logger = log.Logger.With().Caller().Logger()
+			log.Logger = log.With().Caller().Logger()
 		}
 	}
 
 	zerolog.DefaultContextLogger = &log.Logger
 
-	log.Info().Msgf("workspace path: %s", path)
+	log.Info().Msgf("[cfg] workspace path: %s", filepath.Dir(path))
 }
 
 func initDB() {
 	config.SetCustomers(viper.Get("customers"))
 
-	ibolt.Init(filepath.Join(path, config.AppName+".bolt"))
+	ibolt.Init(filepath.Join(filepath.Dir(viper.GetString("path")), config.AppName+".bolt"))
 
 	ierr.CheckErr(ibolt.Update(func(tx *ibolt.Tx) error {
 		_, err := tx.CreateBucketIfNotExists([]byte("config"))
@@ -120,7 +112,7 @@ func newConsoleWriter() io.Writer {
 func newFileWriter() io.Writer {
 	return &zerolog.ConsoleWriter{
 		Out: &lumberjack.Logger{
-			Filename:  filepath.Join(path, config.AppName+".log"),
+			Filename:  filepath.Join(filepath.Dir(viper.GetString("path")), config.AppName+".log"),
 			MaxSize:   100,
 			MaxAge:    360,
 			LocalTime: true,

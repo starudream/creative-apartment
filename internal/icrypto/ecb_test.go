@@ -5,12 +5,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/starudream/creative-apartment/config"
 	"github.com/starudream/creative-apartment/internal/idt"
 )
 
 func TestAESECBP5(t *testing.T) {
-	x := NewAesEcbPKCS5([]byte(config.AESECBP5Key))
+	x := NewAesEcbPKCS5([]byte("yBnulH9ODtonS5lj"))
 
 	src := idt.Bytes("1234567890123456")
 

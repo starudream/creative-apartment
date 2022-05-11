@@ -12,7 +12,7 @@ func Test(t *testing.T) {
 	Init("test.bolt")
 	defer Close()
 
-	e1 := X(func(db *DB) error {
+	e1 := D(func(db *DB) error {
 		t.Log(db.String())
 		t.Log(json.MustMarshalString(db.Stats()))
 		t.Log(json.MustMarshalString(db.Info()))

@@ -16,5 +16,5 @@ func (l logger) Info(msg string, keysAndValues ...any) {
 }
 
 func (l logger) Error(err error, msg string, keysAndValues ...any) {
-	l.Logger.Err(err).Fields(keysAndValues).Msgf("[cron] " + msg)
+	l.Logger.Err(err).CallerSkipFrame(3).Fields(keysAndValues).Msgf("[cron] " + msg)
 }

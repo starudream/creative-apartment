@@ -19,9 +19,6 @@ var (
 
 func New() *resty.Client {
 	nlog := &logger{log.Logger}
-	if viper.GetBool("debug") {
-		nlog = &logger{log.Logger.With().CallerWithSkipFrameCount(8).Logger()}
-	}
 
 	c := resty.New()
 	c.SetTimeout(5 * time.Minute)
