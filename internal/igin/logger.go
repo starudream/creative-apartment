@@ -75,7 +75,7 @@ func Logger() gin.HandlerFunc {
 
 		c.Next()
 
-		latency := time.Now().Sub(start)
+		latency := time.Since(start)
 
 		l = l.With().Dur("latency", latency).Int("code", c.Writer.Status()).Logger()
 

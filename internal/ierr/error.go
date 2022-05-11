@@ -128,6 +128,10 @@ func (e *Error) NotFound() (int, *Error) {
 	return e.Status(http.StatusNotFound)
 }
 
+func (e *Error) NotAllowed() (int, *Error) {
+	return e.Status(http.StatusMethodNotAllowed)
+}
+
 func (e *Error) Conflict() (int, *Error) {
 	return e.Status(http.StatusConflict)
 }
@@ -138,4 +142,12 @@ func (e *Error) Internal() (int, *Error) {
 
 func OK(v ...any) (int, *Error) {
 	return New(v...).OK()
+}
+
+func NotFound(v ...any) (int, *Error) {
+	return New(v...).NotFound()
+}
+
+func NotAllowed(v ...any) (int, *Error) {
+	return New(v...).NotAllowed()
 }

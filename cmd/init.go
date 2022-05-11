@@ -24,13 +24,13 @@ func init() {
 	cobra.OnInitialize(initLogger, initConfig, initDB)
 
 	rootCmd.PersistentFlags().BoolP("debug", "", false, "(env: SCA_DEBUG) show debug information")
-	viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug"))
+	ierr.CheckErr(viper.BindPFlag("debug", rootCmd.PersistentFlags().Lookup("debug")))
 
 	rootCmd.PersistentFlags().StringP("path", "", "", "(env: SCA_PATH) configuration file path")
-	viper.BindPFlag("path", rootCmd.PersistentFlags().Lookup("path"))
+	ierr.CheckErr(viper.BindPFlag("path", rootCmd.PersistentFlags().Lookup("path")))
 
 	rootCmd.PersistentFlags().IntP("port", "", 8089, "(env: SCA_PORT) http server port")
-	viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port"))
+	ierr.CheckErr(viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port")))
 }
 
 func initConfig() {

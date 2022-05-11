@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -18,15 +19,18 @@ import (
 	"github.com/starudream/creative-apartment/internal/app"
 	"github.com/starudream/creative-apartment/internal/ibolt"
 	"github.com/starudream/creative-apartment/internal/icron"
+	"github.com/starudream/creative-apartment/internal/ierr"
 	"github.com/starudream/creative-apartment/internal/igin"
 	"github.com/starudream/creative-apartment/internal/ilog"
+	"github.com/starudream/creative-apartment/internal/iroute"
+	"github.com/starudream/creative-apartment/internal/iu"
 	"github.com/starudream/creative-apartment/internal/json"
 )
 
 var rootCmd = &cobra.Command{
 	Use:     config.AppName,
 	Short:   config.AppName,
-	Version: fmt.Sprintf("%s (%s)", config.VERSION, config.BIDTIME),
+	Version: config.FULL_VERSION,
 	Run: func(cmd *cobra.Command, args []string) {
 		app.Add(initRouter)
 		app.Add(runCron)
@@ -41,7 +45,25 @@ func Execute() {
 }
 
 func initRouter(context.Context) error {
-	igin.S().StaticFS("/", http.FS(dist.FS))
+	igin.S().GET("/version", func(c *gin.Context) { c.String(http.StatusOK, config.FULL_VERSION) })
+	g := igin.S().Group("/api/v1").Use(igin.Logger())
+	{
+		g.GET("electricity", iroute.Electricity)
+		g.GET("water", iroute.Water)
+	}
+	igin.S().Use(igin.Serve("/", igin.StaticFile(dist.FS, ".", true)))
+	igin.S().NoRoute(func(c *gin.Context) {
+		rp := strings.TrimPrefix(c.Request.URL.Path, "/")
+		if iu.SliceContains(dist.Files, rp) {
+			c.FileFromFS(rp, http.FS(dist.FS))
+		} else {
+			c.AbortWithStatusJSON(ierr.NotFound())
+		}
+	})
+	igin.S().NoMethod(func(c *gin.Context) {
+		c.AbortWithStatusJSON(ierr.NotAllowed())
+	})
+	log.Info().Msgf("[http] load static files: %s", strings.Join(dist.Files, ", "))
 	return igin.Run(":" + viper.GetString("port"))
 }
 
@@ -50,8 +72,7 @@ func runCron(context.Context) error {
 		log.Error().Msg("config not contain customers")
 	} else {
 		c := icron.New()
-		c.AddFunc("0 0 6 * * *", runCronCustomers)
-		// c.AddFunc("* * * * * *", runCronCustomers)
+		icron.WrapError(c.AddFunc("0 0 6 * * *", runCronCustomers))
 		c.Run()
 	}
 	return nil
