@@ -97,8 +97,14 @@ func initDB() {
 	ibolt.Init(filepath.Join(filepath.Dir(viper.GetString("path")), config.AppName+".bolt"))
 
 	ierr.CheckErr(ibolt.Update(func(tx *ibolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte("config"))
-		return err
+		buckets := []string{"config", "customer"}
+		for i := 0; i < len(buckets); i++ {
+			_, err := tx.CreateBucketIfNotExists([]byte(buckets[i]))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	}))
 }
 

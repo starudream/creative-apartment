@@ -48,7 +48,7 @@ func (t *Task) Run(ctx context.Context, timeout time.Duration) error {
 	nc, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	tk := time.NewTicker(time.Second)
+	tk := time.NewTicker(10 * time.Millisecond)
 	for {
 		select {
 		case err := <-errCh:

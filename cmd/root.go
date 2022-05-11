@@ -46,12 +46,15 @@ func Execute() {
 
 func initRouter(context.Context) error {
 	igin.S().GET("/version", func(c *gin.Context) { c.String(http.StatusOK, config.FULL_VERSION) })
+
 	g := igin.S().Group("/api/v1").Use(igin.Logger())
 	{
 		g.POST("customers", iroute.ListCustomers)
 		g.POST("house/data", iroute.GetHouseData)
 	}
+
 	igin.S().Use(igin.Serve("/", igin.StaticFile(dist.FS, ".", true)))
+
 	igin.S().NoRoute(func(c *gin.Context) {
 		rp := strings.TrimPrefix(c.Request.URL.Path, "/")
 		if iu.SliceContains(dist.Files, rp) {
@@ -63,6 +66,7 @@ func initRouter(context.Context) error {
 	igin.S().NoMethod(func(c *gin.Context) {
 		c.AbortWithStatusJSON(ierr.NotAllowed())
 	})
+
 	log.Info().Msgf("[http] load static files: %s", strings.Join(dist.Files, ", "))
 	return igin.Run(":" + viper.GetString("port"))
 }
@@ -94,20 +98,39 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 	_ = ibolt.Update(func(tx *ibolt.Tx) error {
 		for _, house := range info.Content {
 			for _, data := range house.List {
-				t, err := time.ParseInLocation(config.DateTimeFormat, data.LastReadTime, time.Local)
+				t0, err := time.ParseInLocation(config.DateTimeFormat, data.LastReadTime, time.Local)
 				if !ilog.WrapError(err) {
 					continue
 				}
-				name := "house_type" + strconv.Itoa(data.EquipmentType) + "_" + customer.Phone
-				bucket, err := tx.CreateBucketIfNotExists([]byte(name))
+				surplus, err := strconv.ParseFloat(data.Surplus, 64)
 				if !ilog.WrapError(err) {
 					continue
 				}
-				if ilog.WrapError(bucket.Put([]byte(t.Format(config.DateFormat)), json.MustMarshal(data)), "store") {
-					log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Str("time", t.Format(config.DateFormat)).Msgf("store house info success")
+				surplusAmount, err := strconv.ParseFloat(data.SurplusAmount, 64)
+				if !ilog.WrapError(err) {
+					continue
+				}
+
+				s0 := customer.Phone + "_house_data_" + t0.Format("2006") + "_" + strconv.Itoa(data.EquipmentType)
+				bucket1, err := tx.CreateBucketIfNotExists([]byte(s0))
+				if !ilog.WrapError(err) {
+					continue
+				}
+
+				v0 := api.SimpleEquipmentInfo{
+					Surplus:       surplus,
+					SurplusAmount: surplusAmount,
+					UnitPrice:     data.UnitPrice,
+					LastReadTime:  t0,
+				}
+
+				if ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")), json.MustMarshal(v0)), "store") {
+					log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("store house info success")
 				}
 			}
 		}
+
+		ilog.WrapError(ibolt.Update(func(tx *ibolt.Tx) error { return tx.Bucket([]byte("customer")).Put([]byte(customer.Phone), nil) }), "store")
 		return nil
 	})
 }

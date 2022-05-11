@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 )
 
 type HouseInfoResp struct {
@@ -34,6 +35,13 @@ type EquipmentInfo struct {
 	UnitPrice        float64 `json:"unitPrice"`    // 单价
 	OperateTime      string  `json:"operateTime"`
 	LastReadTime     string  `json:"lastReadTime"` // 上次读表时间
+}
+
+type SimpleEquipmentInfo struct {
+	Surplus       float64   `json:"surplus"`       // 余量
+	SurplusAmount float64   `json:"surplusAmount"` // 余额
+	UnitPrice     float64   `json:"unitPrice"`     // 单价
+	LastReadTime  time.Time `json:"lastReadTime"`  // 上次读表时间
 }
 
 func GetHouseInfo(accessToken string) *HouseInfoResp {
