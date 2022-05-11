@@ -56,9 +56,10 @@ Each variable is preceded by a `SCA_` prefix
 
 | Variable  | Type   | Default | Description             |
 |-----------|--------|---------|-------------------------|
-| DEBUG     | BOOL   | FALSE   | show debug information  |
 | LOG_LEVEL | STRING | INFO    | log level               |
-| PATH      | STRING |         | configuration file path |
+| DEBUG     | BOOL   | FALSE   | show debug information  |
+| PATH      | STRING | -       | configuration file path |
+| PORT      | INT    | 8089    | http server port        |
 
 - `LOG_LEVEL`: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`
 
