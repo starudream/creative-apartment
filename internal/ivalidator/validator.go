@@ -6,20 +6,34 @@ import (
 	"strings"
 	"sync"
 
+	zhL "github.com/go-playground/locales/zh"
+	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	zhT "github.com/go-playground/validator/v10/translations/zh"
 )
 
 var (
 	validate *validator.Validate
 
 	validateOnce sync.Once
+
+	zhr ut.Translator
 )
 
 func V() *validator.Validate {
 	validateOnce.Do(func() {
 		validate = validator.New()
+		zh := zhL.New()
+		uti := ut.New(zh)
+		zhr, _ = uti.GetTranslator(zh.Locale())
+		_ = zhT.RegisterDefaultTranslations(validate, zhr)
 	})
 	return validate
+}
+
+func UseZH(validate *validator.Validate) error {
+	V()
+	return zhT.RegisterDefaultTranslations(validate, zhr)
 }
 
 func Struct(v any) error {
@@ -68,4 +82,17 @@ func wrapError(err error) error {
 		err = &Errors{es: v}
 	}
 	return err
+}
+
+func Translate(err error) string {
+	if v, ok := err.(validator.ValidationErrors); ok {
+		m := v.Translate(zhr)
+		sb := strings.Builder{}
+		for _, vv := range m {
+			sb.WriteString(vv)
+			sb.WriteString("\n")
+		}
+		return sb.String()
+	}
+	return ""
 }

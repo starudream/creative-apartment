@@ -48,8 +48,8 @@ func initRouter(context.Context) error {
 	igin.S().GET("/version", func(c *gin.Context) { c.String(http.StatusOK, config.FULL_VERSION) })
 	g := igin.S().Group("/api/v1").Use(igin.Logger())
 	{
-		g.GET("electricity", iroute.Electricity)
-		g.GET("water", iroute.Water)
+		g.POST("customers", iroute.ListCustomers)
+		g.POST("house/data", iroute.GetHouseData)
 	}
 	igin.S().Use(igin.Serve("/", igin.StaticFile(dist.FS, ".", true)))
 	igin.S().NoRoute(func(c *gin.Context) {

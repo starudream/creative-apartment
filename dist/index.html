@@ -1,22 +1,147 @@
 <!doctype html>
+<!--suppress JSUnresolvedVariable-->
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>城投宽庭</title>
+    <link href="sweetalert2.min.css" rel="stylesheet">
 </head>
 <body>
-
-<!--<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>-->
-
+<canvas id="chart" style="max-height: 500px;">Your browser does not support the canvas element.</canvas>
 <script src="jquery.min.js"></script>
 <script src="chart.min.js"></script>
+<script src="sweetalert2.min.js"></script>
+<script src="dayjs.min.js"></script>
 <script>
+    const _colors = {
+        red:    "rgb(255, 99, 132)",
+        blue:   "rgb(54, 162, 235)",
+        yellow: "rgb(255, 205, 86)",
+    }
+    const _data = {
+        labels:   ["2022-05-11", "2022-05-12", "2022-05-13", "2022-05-14", "2022-05-15", "2022-05-16", "2022-05-17"],
+        datasets: [
+            {
+                label: "电费",
+                data:  [22.3, 23.2, 21.6, 31.2, null, 25.1, 26.1],
+            },
+            {
+                label: "水费",
+                data:  [23.3, 24.2, 29.6, 21.2, 22.7, 23.1, 24.1],
+            },
+            {
+                label: "煤气费",
+                data:  [21.3, 29.2, 22.6, 22.2, 26.7, 20.1, 29.1],
+            },
+        ],
+    }
+    const options = {
+        locale:      "zh-CN",
+        responsive:  true,
+        interaction: {
+            intersect: false,
+            mode:      "nearest",
+            axis:      "x",
+        },
+        plugins:     {
+            legend:  {
+                display:  true,
+                position: "top",
+                align:    "center",
+            },
+            tooltip: {
+                callbacks: {
+                    footer: function (items) {
+                        let sum = 0
+                        items.forEach(function (item) {
+                            sum += item.parsed.y
+                        })
+                        return "总和：" + sum.toFixed(2)
+                    },
+                },
+            },
+            title:   {
+                display: true,
+                text:    "费用使用情况",
+            },
+        },
+    }
+    let chart
+    let params = {type: "line", data: _data, options: options}
+    let Update = function (data) {
+        console.log(data)
+        chart.data = data
+        chart.data.datasets.forEach(function (dataset) {
+            if (!dataset.label) return
+            if (dataset.label) {
+                if (dataset.label.indexOf("电") > -1) {
+                    dataset.borderColor = _colors.red
+                } else if (dataset.label.indexOf("水") > -1) {
+                    dataset.borderColor = _colors.blue
+                } else if (dataset.label.indexOf("煤气") > -1) {
+                    dataset.borderColor = _colors.yellow
+                }
+            }
+        })
+        chart.update()
+    }
+    let POST = function (url, data, callback) {
+        $.ajax({
+            type:        "POST",
+            url:         url,
+            data:        JSON.stringify(data),
+            contentType: "application/json",
+            timeout:     60 * 1000,
+            complete:    function (xhr) {
+                const resp = JSON.parse(xhr.responseText)
+                if (xhr.status === 200) {
+                    callback(resp)
+                } else {
+                    Swal.fire({title: "Error", text: resp.message, icon: "error"})
+                }
+            },
+        })
+    }
+    let ListCustomers = function () {
+        POST("/api/v1/customers", {}, function (resp) {
+            if (resp.customers && resp.customers.length > 0) {
+                // TODO: TEST
+                GetHouseData(resp.customers[0].phone, dayjs().add(-30, "day"), dayjs())
+            } else {
+                Swal.fire({title: "Error", text: "没有用户信息", icon: "error"})
+            }
+        })
+    }
+    let GetHouseData = function (phone, startTime, endTime) {
+        const data = {
+            phone:     phone,
+            startDate: startTime.format("YYYY-MM-DD"),
+            endDate:   endTime.format("YYYY-MM-DD"),
+        }
+        POST("/api/v1/house/data", data, function (resp) {
+            Update({
+                labels:   resp.dates,
+                datasets: [
+                    {label: "用电量（度）", data: resp.datasets[0]},
+                    {label: "电费（元）", data: resp.datasets[1]},
+                    {label: "用水量（立方米）", data: resp.datasets[2]},
+                    {label: "水费（元）", data: resp.datasets[3]},
+                    {label: "用气量（立方米）", data: resp.datasets[4]},
+                    {label: "气费（元）", data: resp.datasets[5]},
+                ],
+            })
+        })
+    }
     $(function () {
-        console.log("ready")
+        chart = new Chart($("#chart"), params)
+
+        ListCustomers()
+
+        // GetHouseData(dayjs().add(-30, "day"), dayjs())
     })
 </script>
+
 </body>
 </html>

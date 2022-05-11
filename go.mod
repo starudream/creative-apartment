@@ -5,10 +5,13 @@ go 1.18
 require (
 	github.com/forgoer/openssl v1.2.1
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-playground/locales v0.14.0
+	github.com/go-playground/universal-translator v0.18.0
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-colorable v0.1.12
+	github.com/panjf2000/ants/v2 v2.5.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.26.1
 	github.com/satori/go.uuid v1.2.0
@@ -25,8 +28,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/go-playground/locales v0.14.0 // indirect
-	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect

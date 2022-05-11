@@ -7,10 +7,20 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog/log"
+
+	"github.com/starudream/creative-apartment/internal/ivalidator"
 )
 
 func New() *gin.Engine {
+	{
+		validate, ok := binding.Validator.Engine().(*validator.Validate)
+		if ok {
+			*validate = *(ivalidator.V())
+		}
+	}
 	gin.SetMode(gin.ReleaseMode)
 	e := gin.New()
 	e.Use(recovery())

@@ -144,10 +144,30 @@ func OK(v ...any) (int, *Error) {
 	return New(v...).OK()
 }
 
+func Param(v ...any) (int, *Error) {
+	return New(v...).Param()
+}
+
+func NoAuth(v ...any) (int, *Error) {
+	return New(v...).NoAuth()
+}
+
+func Forbidden(v ...any) (int, *Error) {
+	return New(v...).Forbidden()
+}
+
 func NotFound(v ...any) (int, *Error) {
 	return New(v...).NotFound()
 }
 
 func NotAllowed(v ...any) (int, *Error) {
 	return New(v...).NotAllowed()
+}
+
+func Conflict(v ...any) (int, *Error) {
+	return New(v...).Conflict()
+}
+
+func Internal(v ...any) (int, *Error) {
+	return New(v...).Internal()
 }

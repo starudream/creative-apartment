@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	//go:embed *.js *.html *.ico
+	//go:embed *.css *.js *.html *.ico
 	FS embed.FS
 
 	Files []string

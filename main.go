@@ -1,8 +1,6 @@
 package main
 
 import (
-	"github.com/spf13/viper"
-
 	"github.com/starudream/creative-apartment/cmd"
 	"github.com/starudream/creative-apartment/internal/app"
 	"github.com/starudream/creative-apartment/internal/ibolt"
@@ -11,7 +9,7 @@ import (
 )
 
 func main() {
-	defer ierr.Recover(app.Stop, igin.Close, ibolt.Close, ierr.WrapErrFunc(viper.WriteConfig))
+	defer ierr.Recover(app.Stop, igin.Close, ibolt.Close)
 
 	cmd.Execute()
 

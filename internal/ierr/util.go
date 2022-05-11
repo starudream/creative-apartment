@@ -18,6 +18,6 @@ func CheckErr(msg any) {
 	}
 }
 
-func WrapErrFunc(f func() error) func() {
-	return func() { _ = f() }
+func WrapToFunc(err error) func() error {
+	return func() error { return err }
 }
