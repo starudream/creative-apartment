@@ -17,7 +17,3 @@ func CheckErr(msg any) {
 		os.Exit(1)
 	}
 }
-
-func WrapToFunc(err error) func() error {
-	return func() error { return err }
-}

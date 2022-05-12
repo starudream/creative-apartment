@@ -32,14 +32,19 @@ func TestMustUnmarshalTo(t *testing.T) {
 
 	t.Log(string(bs))
 
-	xx := MustUnmarshalTo[*X](bs)
+	xx, err := UnmarshalTo[*X](bs)
+	require.NoError(t, err)
 
 	t.Logf("%#v", xx)
 
-	require.Equal(t, x.A, xx.A)
-	require.Equal(t, x.B, xx.B)
-	require.Equal(t, x.C, xx.C)
-	require.Equal(t, x.D, xx.D)
-	require.Equal(t, x.E, xx.E)
-	require.Equal(t, x.F, xx.F)
+	xy := MustUnmarshalTo[*X](bs)
+
+	t.Logf("%#v", xy)
+
+	require.Equal(t, x.A, xy.A)
+	require.Equal(t, x.B, xy.B)
+	require.Equal(t, x.C, xy.C)
+	require.Equal(t, x.D, xy.D)
+	require.Equal(t, x.E, xy.E)
+	require.Equal(t, x.F, xy.F)
 }

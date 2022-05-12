@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
@@ -22,9 +23,9 @@ import (
 	"github.com/starudream/creative-apartment/internal/ierr"
 	"github.com/starudream/creative-apartment/internal/igin"
 	"github.com/starudream/creative-apartment/internal/ilog"
-	"github.com/starudream/creative-apartment/internal/iroute"
 	"github.com/starudream/creative-apartment/internal/iu"
 	"github.com/starudream/creative-apartment/internal/json"
+	"github.com/starudream/creative-apartment/route"
 )
 
 var rootCmd = &cobra.Command{
@@ -49,8 +50,8 @@ func initRouter(context.Context) error {
 
 	g := igin.S().Group("/api/v1").Use(igin.Logger())
 	{
-		g.POST("customers", iroute.ListCustomers)
-		g.POST("house/data", iroute.GetHouseData)
+		g.POST("customers", route.ListCustomers)
+		g.POST("house/data", route.GetHouseData)
 	}
 
 	igin.S().Use(igin.Serve("/", igin.StaticFile(dist.FS, ".", true)))
@@ -92,6 +93,7 @@ func runCronCustomers() {
 			storeHouseInfo(customer, info)
 		}
 	}
+	log.Info().Msgf("[cron] done")
 }
 
 func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
@@ -102,35 +104,70 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 				if !ilog.WrapError(err) {
 					continue
 				}
-				surplus, err := strconv.ParseFloat(data.Surplus, 64)
+				surplus, err := decimal.NewFromString(data.Surplus)
 				if !ilog.WrapError(err) {
 					continue
 				}
-				surplusAmount, err := strconv.ParseFloat(data.SurplusAmount, 64)
+				surplusAmount, err := decimal.NewFromString(data.SurplusAmount)
 				if !ilog.WrapError(err) {
 					continue
 				}
 
 				s0 := customer.Phone + "_house_data_" + t0.Format("2006") + "_" + strconv.Itoa(data.EquipmentType)
-				bucket1, err := tx.CreateBucketIfNotExists([]byte(s0))
+				bucket0, err := tx.CreateBucketIfNotExists([]byte(s0))
 				if !ilog.WrapError(err) {
 					continue
 				}
 
-				v0 := api.SimpleEquipmentInfo{
-					Surplus:       surplus,
-					SurplusAmount: surplusAmount,
-					UnitPrice:     data.UnitPrice,
-					LastReadTime:  t0,
+				v0 := api.SimpleEquipmentInfo{}
+				v0.Surplus, _ = surplus.Float64()
+				v0.SurplusAmount, _ = surplusAmount.Float64()
+				v0.UnitPrice = data.UnitPrice
+				v0.LastReadTime = t0
+
+				if !ilog.WrapError(bucket0.Put([]byte(t0.Format("0102")), json.MustMarshal(v0)), "store") {
+					continue
 				}
 
-				if ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")), json.MustMarshal(v0)), "store") {
-					log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("store house info success")
+				log.Info().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("store house info success")
+
+				t1 := t0.AddDate(0, 0, -1)
+
+				bs := bucket0.Get([]byte(t1.Format("0102")))
+				if len(bs) == 0 {
+					continue
+				}
+
+				v1, err := json.UnmarshalTo[api.SimpleEquipmentInfo](bs)
+				if !ilog.WrapError(err) {
+					continue
+				}
+
+				s1 := customer.Phone + "_house_stats_" + t1.Format("2006") + "_" + strconv.Itoa(data.EquipmentType)
+				bucket1, err := tx.CreateBucketIfNotExists([]byte(s1))
+				if !ilog.WrapError(err) {
+					continue
+				}
+
+				a := v1.Surplus - v0.Surplus
+				for a < 0 {
+					a += config.RechargeAmount * v1.UnitPrice
+				}
+				if !ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")+"_a"), []byte(decimal.NewFromFloat(a).StringFixed(2))), "store") {
+					continue
+				}
+
+				b := v1.SurplusAmount - v0.SurplusAmount
+				for b < 0 {
+					b += config.RechargeAmount
+				}
+				if !ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")+"_b"), []byte(decimal.NewFromFloat(b).StringFixed(2))), "store") {
+					continue
 				}
 			}
 		}
 
-		ilog.WrapError(ibolt.Update(func(tx *ibolt.Tx) error { return tx.Bucket([]byte("customer")).Put([]byte(customer.Phone), nil) }), "store")
+		ilog.WrapError(tx.Bucket([]byte("customer")).Put([]byte(customer.Phone), nil), "store")
 		return nil
 	})
 }

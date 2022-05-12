@@ -1,17 +1,14 @@
 package cmd
 
 import (
-	"io"
 	"path/filepath"
 	"strings"
 
-	"github.com/mattn/go-colorable"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	jww "github.com/spf13/jwalterweatherman"
 	"github.com/spf13/viper"
-	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/starudream/creative-apartment/config"
 	"github.com/starudream/creative-apartment/internal/ibolt"
@@ -80,7 +77,8 @@ func initConfig() {
 	zerolog.SetGlobalLevel(level)
 
 	if level < zerolog.NoLevel {
-		log.Logger = log.Output(zerolog.MultiLevelWriter(newConsoleWriter(), newFileWriter()))
+		lfn := filepath.Join(filepath.Dir(viper.GetString("path")), config.AppName+".log")
+		log.Logger = log.Output(zerolog.MultiLevelWriter(ilog.NewConsoleWriter(), ilog.NewFileWriter(lfn)))
 		if debug {
 			log.Logger = log.With().Caller().Logger()
 		}
@@ -108,28 +106,8 @@ func initDB() {
 	}))
 }
 
-func newConsoleWriter() io.Writer {
-	return &zerolog.ConsoleWriter{
-		Out:        colorable.NewColorableStdout(),
-		TimeFormat: "2006-01-02T15:04:05.000Z07:00",
-	}
-}
-
-func newFileWriter() io.Writer {
-	return &zerolog.ConsoleWriter{
-		Out: &lumberjack.Logger{
-			Filename:  filepath.Join(filepath.Dir(viper.GetString("path")), config.AppName+".log"),
-			MaxSize:   100,
-			MaxAge:    360,
-			LocalTime: true,
-		},
-		NoColor:    true,
-		TimeFormat: "2006-01-02T15:04:05.000Z07:00",
-	}
-}
-
 func initLogger() {
-	w := ilog.New(log.Output(newConsoleWriter()), "cfg")
+	w := ilog.New(log.Output(ilog.NewConsoleWriter()), "cfg")
 	jww.TRACE = w.WithLevel(zerolog.TraceLevel)
 	jww.DEBUG = w.WithLevel(zerolog.DebugLevel)
 	jww.INFO = w.WithLevel(zerolog.InfoLevel)

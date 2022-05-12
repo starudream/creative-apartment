@@ -15,11 +15,6 @@
 <script src="sweetalert2.min.js"></script>
 <script src="dayjs.min.js"></script>
 <script>
-    const _colors = {
-        red:    "rgb(255, 99, 132)",
-        blue:   "rgb(54, 162, 235)",
-        yellow: "rgb(255, 205, 86)",
-    }
     const _data = {
         labels:   ["2022-05-11", "2022-05-12", "2022-05-13", "2022-05-14", "2022-05-15", "2022-05-16", "2022-05-17"],
         datasets: [
@@ -56,9 +51,11 @@
                     footer: function (items) {
                         let sum = 0
                         items.forEach(function (item) {
-                            sum += item.parsed.y
+                            if (item.dataset.label && item.dataset.label.indexOf("费") > -1) {
+                                sum += item.parsed.y
+                            }
                         })
-                        return "总和：" + sum.toFixed(2)
+                        return "费用总和 " + sum.toFixed(2) + " 元"
                     },
                 },
             },
@@ -76,12 +73,18 @@
         chart.data.datasets.forEach(function (dataset) {
             if (!dataset.label) return
             if (dataset.label) {
-                if (dataset.label.indexOf("电") > -1) {
-                    dataset.borderColor = _colors.red
-                } else if (dataset.label.indexOf("水") > -1) {
-                    dataset.borderColor = _colors.blue
-                } else if (dataset.label.indexOf("煤气") > -1) {
-                    dataset.borderColor = _colors.yellow
+                if (dataset.label.indexOf("电量") > -1) {
+                    dataset.borderColor = "rgb(217, 136, 128)"
+                } else if (dataset.label.indexOf("电费") > -1) {
+                    dataset.borderColor = "rgb(203, 67, 53)"
+                } else if (dataset.label.indexOf("水量") > -1) {
+                    dataset.borderColor = "rgb(127, 179, 213)"
+                } else if (dataset.label.indexOf("水费") > -1) {
+                    dataset.borderColor = "rgb(46, 134, 193)"
+                } else if (dataset.label.indexOf("气量") > -1) {
+                    dataset.borderColor = "rgb(118, 215, 196)"
+                } else if (dataset.label.indexOf("气费") > -1) {
+                    dataset.borderColor = "rgb(19, 141, 117)"
                 }
             }
         })
@@ -108,6 +111,7 @@
         POST("/api/v1/customers", {}, function (resp) {
             if (resp.customers && resp.customers.length > 0) {
                 // TODO: TEST
+                // GetHouseData("13312341234", dayjs().add(-10, "day"), dayjs())
                 GetHouseData(resp.customers[0].phone, dayjs().add(-30, "day"), dayjs())
             } else {
                 Swal.fire({title: "Error", text: "没有用户信息", icon: "error"})

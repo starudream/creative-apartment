@@ -23,7 +23,7 @@ var (
 	ss []S
 )
 
-type S func(ctx2 context.Context) error
+type S func(ctx context.Context) error
 
 func Add(s S) {
 	mu.Lock()

@@ -3,64 +3,92 @@ package itask
 import (
 	"context"
 	"runtime"
+	"runtime/debug"
 	"sync"
 	"time"
 
-	"github.com/panjf2000/ants/v2"
 	"github.com/rs/zerolog/log"
 )
 
 type Task struct {
-	pool *ants.Pool
+	ctx    context.Context
+	cancel func()
 
 	mu sync.Mutex
-	fs []func() error
+	fs []F
 }
 
-func New(sizes ...int) *Task {
-	if len(sizes) == 0 || sizes[0] <= 0 {
-		sizes = []int{2 * runtime.NumCPU()}
+type F func(ctx context.Context) error
+
+func New(ctx context.Context, timeout time.Duration) *Task {
+	if ctx == nil {
+		ctx = context.Background()
 	}
-	pool, _ := ants.NewPool(sizes[0], ants.WithLogger(&logger{log.Logger}))
-	return &Task{pool: pool}
+
+	task := &Task{}
+
+	if timeout > 0 {
+		task.ctx, task.cancel = context.WithTimeout(ctx, timeout)
+	} else {
+		task.ctx, task.cancel = context.WithCancel(ctx)
+	}
+
+	return task
 }
 
-func (t *Task) Add(fs ...func() error) {
+func (t *Task) Add(fs ...F) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.fs = append(t.fs, fs...)
 }
 
-func (t *Task) Run(ctx context.Context, timeout time.Duration) error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
+func (t *Task) Run(n int) error {
+	if n <= 0 {
+		n = 2 * runtime.NumCPU()
+	}
+
+	wg := &sync.WaitGroup{}
+
+	wg.Add(len(t.fs))
 
 	errCh := make(chan error, 1)
-	for i := range t.fs {
+	for i := 0; i < len(t.fs); i++ {
 		f := t.fs[i]
-		err := t.pool.Submit(func() { errCh <- f() })
-		if err != nil {
-			return err
-		}
+		go func() {
+			defer func() {
+				if ev := recover(); ev != nil {
+					log.Error().CallerSkipFrame(2).Msgf("[task] panic, %v\n%s", ev, debug.Stack())
+				}
+				wg.Add(-1)
+			}()
+			errCh <- f(t.ctx)
+		}()
 	}
-	defer t.pool.Release()
+	defer t.Stop()
 
-	nc, cancel := context.WithTimeout(ctx, timeout)
-	defer cancel()
+	doneCh := make(chan struct{}, 1)
 
-	tk := time.NewTicker(10 * time.Millisecond)
+	go func() {
+		wg.Wait()
+		close(doneCh)
+	}()
+
 	for {
 		select {
 		case err := <-errCh:
 			if err != nil {
+				t.Stop()
 				return err
 			}
-		case <-nc.Done():
-			return nc.Err()
-		case <-tk.C:
-			if t.pool.Running() == 0 && t.pool.Waiting() == 0 {
-				return nil
-			}
+		case <-doneCh:
+			t.Stop()
+			return nil
+		case <-t.ctx.Done():
+			return t.ctx.Err()
 		}
 	}
+}
+
+func (t *Task) Stop() {
+	t.cancel()
 }

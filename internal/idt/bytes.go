@@ -3,6 +3,8 @@ package idt
 import (
 	"encoding/base64"
 	"encoding/hex"
+
+	"github.com/spf13/cast"
 )
 
 type Bytes []byte
@@ -17,4 +19,8 @@ func (bs Bytes) Hex() string {
 
 func (bs Bytes) Base64String() string {
 	return base64.StdEncoding.EncodeToString(bs)
+}
+
+func ToBytes(v any) Bytes {
+	return Bytes(cast.ToString(v))
 }

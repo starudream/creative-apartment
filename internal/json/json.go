@@ -11,6 +11,10 @@ var (
 	Unmarshal = json.Unmarshal
 )
 
+func UnmarshalTo[T any](bs []byte) (m T, err error) {
+	return m, Unmarshal(bs, &m)
+}
+
 func MustMarshal(v any) []byte {
 	bs, err := Marshal(v)
 	if err != nil {
