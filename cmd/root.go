@@ -46,9 +46,11 @@ func Execute() {
 }
 
 func initRouter(context.Context) error {
+	am := igin.Auth(viper.GetString("secret"))
+
 	igin.S().GET("/version", func(c *gin.Context) { c.String(http.StatusOK, config.FULL_VERSION) })
 
-	g := igin.S().Group("/api/v1").Use(igin.Logger())
+	g := igin.S().Group("/api/v1").Use(igin.Logger(), am)
 	{
 		g.POST("customers", route.ListCustomers)
 		g.POST("house/data", route.GetHouseData)

@@ -12,9 +12,11 @@ import (
 
 	"github.com/starudream/creative-apartment/config"
 	"github.com/starudream/creative-apartment/internal/ibolt"
+	"github.com/starudream/creative-apartment/internal/icfg"
 	"github.com/starudream/creative-apartment/internal/ierr"
 	"github.com/starudream/creative-apartment/internal/ilog"
 	"github.com/starudream/creative-apartment/internal/ios"
+	"github.com/starudream/creative-apartment/internal/iseq"
 )
 
 func init() {
@@ -28,6 +30,9 @@ func init() {
 
 	rootCmd.PersistentFlags().IntP("port", "", 8089, "(env: SCA_PORT) http server port")
 	ierr.CheckErr(viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port")))
+
+	rootCmd.PersistentFlags().IntP("secret", "", 8089, "(env: SCA_SECRET) login secret")
+	ierr.CheckErr(viper.BindPFlag("secret", rootCmd.PersistentFlags().Lookup("secret")))
 }
 
 func initConfig() {
@@ -87,6 +92,15 @@ func initConfig() {
 	zerolog.DefaultContextLogger = &log.Logger
 
 	log.Info().Msgf("[cfg] workspace path: %s", filepath.Dir(path))
+
+	secret := viper.GetString("secret")
+	if secret == "" {
+		secret = iseq.UUID()
+		viper.Set("secret", secret)
+		icfg.Save()
+	}
+
+	log.Info().Msgf("[cfg] login secret: %s", secret)
 }
 
 func initDB() {

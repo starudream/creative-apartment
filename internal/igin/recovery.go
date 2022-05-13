@@ -15,7 +15,7 @@ func recovery() gin.HandlerFunc {
 			if ev := recover(); ev != nil {
 				stack := debug.Stack()
 				log.Error().Msgf("[http] panic, %v\n%s", ev, stack)
-				c.AbortWithStatusJSON(ierr.New().Internal())
+				c.AbortWithStatusJSON(ierr.Internal())
 			}
 		}()
 		c.Next()
