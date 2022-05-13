@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -19,6 +20,7 @@ import (
 	"github.com/starudream/creative-apartment/dist"
 	"github.com/starudream/creative-apartment/internal/app"
 	"github.com/starudream/creative-apartment/internal/ibolt"
+	"github.com/starudream/creative-apartment/internal/ibot"
 	"github.com/starudream/creative-apartment/internal/icron"
 	"github.com/starudream/creative-apartment/internal/ierr"
 	"github.com/starudream/creative-apartment/internal/igin"
@@ -105,6 +107,7 @@ func runCronCustomers() {
 func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 	_ = ibolt.Update(func(tx *ibolt.Tx) error {
 		for _, house := range info.Content {
+			var vs0, vs1, datetime = make([]api.SimpleEquipmentInfo, 3), make([]api.SimpleEquipmentInfo, 3), ""
 			for _, data := range house.List {
 				t0, err := time.ParseInLocation(config.DateTimeFormat, data.LastReadTime, time.Local)
 				if !ilog.WrapError(err) {
@@ -136,6 +139,8 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 				v0.UnitPrice = data.UnitPrice
 				v0.LastReadTime = t0
 
+				vs0[data.EquipmentType-1] = v0
+
 				if !ilog.WrapError(bucket0.Put([]byte(t0.Format("0102")), json.MustMarshal(v0)), "store") {
 					continue
 				}
@@ -143,6 +148,10 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 				log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("store house info success")
 
 				t1 := t0.AddDate(0, 0, -1)
+
+				if datetime == "" {
+					datetime = t1.Format(config.DateFormat)
+				}
 
 				bs := bucket0.Get([]byte(t1.Format("0102")))
 				if len(bs) == 0 {
@@ -175,10 +184,54 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 				if !ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")+"_b"), []byte(decimal.NewFromFloat(b).StringFixed(2))), "store") {
 					continue
 				}
+
+				vs1[data.EquipmentType-1] = api.SimpleEquipmentInfo{Surplus: a, SurplusAmount: b, UnitPrice: v1.UnitPrice}
+			}
+			if house.CustomerPhone != "" {
+				sendHouseInfoMessage(house.CustomerPhone, datetime, vs0, vs1)
 			}
 		}
-
 		ilog.WrapError(tx.Bucket([]byte("customer")).Put([]byte(customer.Phone), nil), "store")
 		return nil
 	})
+}
+
+func sendHouseInfoMessage(phone, datetime string, vs0, vs1 []api.SimpleEquipmentInfo) {
+	msg := strings.Builder{}
+	for i := 0; i < 3; i++ {
+		tag := ""
+		switch i {
+		case 0:
+			tag = "电"
+		case 1:
+			tag = "水"
+		case 2:
+			tag = "气"
+		}
+		x := false
+		if v := vs1[i]; v.UnitPrice > 0 {
+			msg.WriteString(tag)
+			msg.WriteString("费")
+			msg.WriteString(decimal.NewFromFloat(v.SurplusAmount).StringFixed(2))
+			x = true
+		}
+		if v := vs0[i]; v.UnitPrice > 0 {
+			if x {
+				msg.WriteString("，剩余")
+			} else {
+				msg.WriteString("剩余")
+				msg.WriteString(tag)
+				msg.WriteString("费")
+			}
+			msg.WriteString(decimal.NewFromFloat(v.SurplusAmount).StringFixed(2))
+			x = true
+		}
+		if x {
+			msg.WriteString("\n")
+		}
+	}
+	if msg.Len() > 0 {
+		s := fmt.Sprintf("【%s】【%s】\n%s", phone, datetime, msg.String())
+		ierr.CheckErr(ibot.Dingtalk.SendMessage(s))
+	}
 }

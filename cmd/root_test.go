@@ -27,6 +27,7 @@ func TestStoreHouseInfo(t *testing.T) {
 		info := &api.HouseInfoResp{
 			Content: []*api.HouseInfoContent{
 				{
+					// CustomerPhone: customer.Phone,
 					List: []*api.EquipmentInfo{
 						{
 							EquipmentType: 1,

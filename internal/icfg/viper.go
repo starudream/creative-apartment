@@ -6,7 +6,7 @@ import (
 	"github.com/starudream/creative-apartment/internal/ierr"
 )
 
-var keys = []string{"secret", "customers"}
+var keys = []string{"secret", "customers", "dingtalk"}
 
 func Save() {
 	nViper := viper.New()
