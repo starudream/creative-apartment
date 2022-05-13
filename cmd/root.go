@@ -70,7 +70,7 @@ func initRouter(context.Context) error {
 		c.AbortWithStatusJSON(ierr.NotAllowed())
 	})
 
-	log.Info().Msgf("[http] load static files: %s", strings.Join(dist.Files, ", "))
+	log.Debug().Msgf("[http] load static files: %s", strings.Join(dist.Files, ", "))
 	return igin.Run(":" + viper.GetString("port"))
 }
 
@@ -125,6 +125,11 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 					continue
 				}
 
+				if len(bucket0.Get([]byte(t0.Format("0102")))) > 0 {
+					log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("already stored house info")
+					continue
+				}
+
 				v0 := api.SimpleEquipmentInfo{}
 				v0.Surplus, _ = surplus.Float64()
 				v0.SurplusAmount, _ = surplusAmount.Float64()
@@ -135,7 +140,7 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 					continue
 				}
 
-				log.Info().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("store house info success")
+				log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("store house info success")
 
 				t1 := t0.AddDate(0, 0, -1)
 
