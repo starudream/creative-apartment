@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"runtime/debug"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/rs/zerolog/log"
@@ -48,23 +49,46 @@ func (t *Task) Run(n int) error {
 	}
 
 	wg := &sync.WaitGroup{}
-
 	wg.Add(len(t.fs))
 
+	fCh := make(chan F)
 	errCh := make(chan error, 1)
-	for i := 0; i < len(t.fs); i++ {
-		f := t.fs[i]
+	errSig := int32(0)
+	errOnce := sync.Once{}
+
+	for i := 0; i < n; i++ {
 		go func() {
-			defer func() {
-				if ev := recover(); ev != nil {
-					log.Error().CallerSkipFrame(2).Msgf("[task] panic, %v\n%s", ev, debug.Stack())
+			for {
+				f, ok := <-fCh
+				if !ok {
+					return
 				}
-				wg.Add(-1)
-			}()
-			errCh <- f(t.ctx)
+				if f == nil || atomic.LoadInt32(&errSig) != 0 {
+					return
+				}
+				func() {
+					defer func() {
+						if ev := recover(); ev != nil {
+							log.Error().CallerSkipFrame(2).Msgf("[task] panic, %v\n%s", ev, debug.Stack())
+						}
+						wg.Add(-1)
+					}()
+					err := f(t.ctx)
+					if err != nil {
+						errOnce.Do(func() {
+							atomic.StoreInt32(&errSig, 1)
+							errCh <- err
+						})
+					}
+				}()
+			}
 		}()
 	}
 	defer t.Stop()
+
+	for i := range t.fs {
+		fCh <- t.fs[i]
+	}
 
 	doneCh := make(chan struct{}, 1)
 

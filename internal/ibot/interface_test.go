@@ -1,6 +1,7 @@
 package ibot
 
 import (
+	"os"
 	"testing"
 
 	"github.com/starudream/creative-apartment/internal/itest"
@@ -9,5 +10,5 @@ import (
 func TestMain(m *testing.M) {
 	itest.Init()
 
-	m.Run()
+	os.Exit(m.Run())
 }

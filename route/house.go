@@ -59,6 +59,7 @@ func GetHouseData(c *Context) {
 	}
 
 	for t := sd; t.Before(ed); {
+		// nolint
 		x, m := itime.New(t).EndOfYear(), map[string][]float64{}
 		if ed.After(x) {
 			m, err = GetHouseStatsByYear(c, req.Phone, t.Format("2006"), t.Format("0102"), x.Format("0102"))
