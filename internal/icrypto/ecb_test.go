@@ -15,7 +15,7 @@ func TestAESECBP5(t *testing.T) {
 
 	s1, err := x.Encrypt(src)
 	require.NoError(t, err)
-	require.Equal(t, "ZAygwCVRe79dU5Y3AH9HFt3vcH6wmvXL5Yck2qWlsYI=", s1.Base64String())
+	require.Equal(t, "ZAygwCVRe79dU5Y3AH9HFt3vcH6wmvXL5Yck2qWlsYI=", s1.Base64Std())
 
 	s2, err := x.Decrypt(s1)
 	require.NoError(t, err)

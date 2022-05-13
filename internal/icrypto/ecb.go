@@ -6,8 +6,8 @@ import (
 	"github.com/starudream/creative-apartment/internal/idt"
 )
 
-func NewAesEcbPKCS5(key []byte) *xAesEcb {
-	return &xAesEcb{key: key, padding: openssl.PKCS5_PADDING}
+func NewAesEcbPKCS5(key []byte) xAesEcb {
+	return xAesEcb{key: key, padding: openssl.PKCS5_PADDING}
 }
 
 type xAesEcb struct {

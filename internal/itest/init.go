@@ -15,9 +15,17 @@ import (
 func Init() {
 	log.Logger = log.Output(ilog.NewConsoleWriter())
 
+	viper.SetEnvPrefix("sca")
 	viper.AutomaticEnv()
-	path := viper.GetString("SCA_PATH")
+	viper.SetDefault("debug", true)
+
+	path := viper.GetString("path")
+
+	log.Info().Msgf("path: %s", path)
+
 	if path != "" {
+		viper.SetConfigFile(path)
+		_ = viper.ReadInConfig()
 		path = filepath.Dir(path)
 	} else {
 		path = ios.Executable()

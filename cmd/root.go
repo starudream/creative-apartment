@@ -75,11 +75,15 @@ func initRouter(context.Context) error {
 }
 
 func runCron(context.Context) error {
+	time.Sleep(time.Second)
+
 	if len(config.GetCustomers()) == 0 {
 		log.Error().Msg("config not contain customers")
 	} else {
 		c := icron.New()
-		icron.WrapError(c.AddFunc("0 0 6 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 06 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 14 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 22 * * *", runCronCustomers))
 		c.Run()
 	}
 	return nil

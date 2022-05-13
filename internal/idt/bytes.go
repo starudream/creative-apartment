@@ -17,8 +17,12 @@ func (bs Bytes) Hex() string {
 	return hex.EncodeToString(bs)
 }
 
-func (bs Bytes) Base64String() string {
+func (bs Bytes) Base64Std() string {
 	return base64.StdEncoding.EncodeToString(bs)
+}
+
+func (bs Bytes) Base64URL() string {
+	return base64.URLEncoding.EncodeToString(bs)
 }
 
 func ToBytes(v any) Bytes {
