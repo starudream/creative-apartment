@@ -187,7 +187,7 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 
 				vs1[data.EquipmentType-1] = api.SimpleEquipmentInfo{Surplus: a, SurplusAmount: b, UnitPrice: v1.UnitPrice}
 			}
-			if house.CustomerPhone != "" {
+			if house.CustomerPhone != "" && viper.GetString("dingtalk.token") != "" {
 				sendHouseInfoMessage(house.CustomerPhone, datetime, vs0, vs1)
 			}
 		}
