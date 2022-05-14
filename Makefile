@@ -30,6 +30,9 @@ tidy:
 clean:
 	rm -rf bin/*
 
+upx:
+	upx bin/*
+
 lint:
 	golangci-lint run --skip-dirs-use-default
 
