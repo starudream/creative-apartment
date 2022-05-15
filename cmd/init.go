@@ -31,7 +31,7 @@ func init() {
 	rootCmd.PersistentFlags().IntP("port", "", 8089, "(env: SCA_PORT) http server port")
 	ierr.CheckErr(viper.BindPFlag("port", rootCmd.PersistentFlags().Lookup("port")))
 
-	rootCmd.PersistentFlags().StringP("secret", "", "", "(env: SCA_SECRET) login secret")
+	rootCmd.PersistentFlags().StringP("secret", "", "", "(env: SCA_SECRET) http server login secret")
 	ierr.CheckErr(viper.BindPFlag("secret", rootCmd.PersistentFlags().Lookup("secret")))
 }
 

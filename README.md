@@ -1,12 +1,15 @@
-# Creative Apartment （城投宽庭） `WIP`
+# Creative Apartment （城投宽庭）
 
-![Golang](https://img.shields.io/github/workflow/status/starudream/creative-apartment/Golang/master?style=for-the-badge)
-![Docker](https://img.shields.io/github/workflow/status/starudream/creative-apartment/Docker/master?style=for-the-badge)
+![Golang](https://img.shields.io/github/workflow/status/starudream/creative-apartment/Golang/master?label=Golang&style=for-the-badge)
+![Docker](https://img.shields.io/github/workflow/status/starudream/creative-apartment/Docker/master?label=Docker&style=for-the-badge)
+![Release](https://img.shields.io/github/v/release/starudream/creative-apartment?include_prereleases&style=for-the-badge)
 ![License](https://img.shields.io/badge/License-Apache%20License%202.0-blue?style=for-the-badge)
 
-每日运行收集电费、水费相关数据，并绘制趋势图。
+每日运行收集电费、水费相关数据。
 
 ## Usage
+
+### Docker
 
 ![Version](https://img.shields.io/docker/v/starudream/creative-apartment?style=for-the-badge)
 ![Size](https://img.shields.io/docker/image-size/starudream/creative-apartment/latest?style=for-the-badge)
@@ -22,11 +25,11 @@ mkdir -p /opt/docker/creative-apartment
 docker run -d \
     --name creative-apartment \
     --restart always \
+    -p 8089:8089 \
     -e SCA_DEBUG=true \
-    -e SCA_LOG_LEVEL=error \
     -e SCA_PATH=/data/creative-apartment.yaml \
-    -v $(pwd)/example:/data \
-    starudream/creative-apartment /app run
+    -v /opt/docker/creative-apartment:/data \
+    starudream/creative-apartment
 ```
 
 ## Configuration
@@ -45,7 +48,7 @@ docker run -d \
 
 The configuration file is read sequentially from the following paths:
 
-- `/creative-apartment.yaml`
+- `${EXECUTED_PATH}/creative-apartment.yaml`
 - `${HOME}/creative-apartment.yaml`
 - `${HOME}/.config/starudream/creative-apartment.yaml`
 - `${SCA_PATH}`
@@ -54,12 +57,15 @@ The configuration file is read sequentially from the following paths:
 
 Each variable is preceded by a `SCA_` prefix
 
-| Variable  | Type   | Default | Description             |
-|-----------|--------|---------|-------------------------|
-| LOG_LEVEL | STRING | INFO    | log level               |
-| DEBUG     | BOOL   | FALSE   | show debug information  |
-| PATH      | STRING | -       | configuration file path |
-| PORT      | INT    | 8089    | http server port        |
+| Variable        | Type   | Default | Description              |
+|-----------------|--------|---------|--------------------------|
+| LOG_LEVEL       | STRING | INFO    | log level                |
+| DEBUG           | BOOL   | FALSE   | show debug information   |
+| PATH            | STRING | -       | configuration file path  |
+| PORT            | INT    | 8089    | http server port         |
+| SECRET          | STRING | -       | http server login secret |
+| DINGTALK_TOKEN  | STRING | -       | dingtalk robot token     |
+| DINGTALK_SECRET | STRING | -       | dingtalk robot secret    |
 
 - `LOG_LEVEL`: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`
 
@@ -67,8 +73,12 @@ Each variable is preceded by a `SCA_` prefix
 
 ```yaml
 customers:
-    - phone: "xxx"
-      token: "yyy"
+    -   phone: "${PHONE}"
+        token: "${ACCESS_TOKEN}"
+dingtalk:
+    secret: "${DINGTALK_SECRET}"
+    token: "${DINGTALK_TOKEN}"
+secret: "${SECRET}"
 ```
 
 ## License
