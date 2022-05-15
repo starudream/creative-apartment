@@ -1,6 +1,9 @@
 package icfg
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/spf13/viper"
 
 	"github.com/starudream/creative-apartment/internal/ierr"
@@ -9,6 +12,7 @@ import (
 var keys = []string{"secret", "customers", "dingtalk"}
 
 func Save() {
+	ierr.CheckErr(os.MkdirAll(filepath.Dir(viper.ConfigFileUsed()), 0755))
 	nViper := viper.New()
 	for i := 0; i < len(keys); i++ {
 		nViper.Set(keys[i], viper.Get(keys[i]))
