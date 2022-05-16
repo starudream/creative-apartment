@@ -56,7 +56,7 @@ func initRouter(context.Context) error {
 		g.POST("house/data", route.GetHouseData)
 	}
 
-	igin.S().Use(igin.Serve("/", igin.LocalFileSystem("dist"), func(c *gin.Context) { c.AbortWithStatusJSON(ierr.NotFound()) }))
+	igin.S().Use(igin.Static("/", igin.LocalFileSystem("dist"), func(c *gin.Context) { c.AbortWithStatusJSON(ierr.NotFound()) }))
 	igin.S().NoMethod(func(c *gin.Context) { c.AbortWithStatusJSON(ierr.NotAllowed()) })
 
 	return igin.Run(":" + viper.GetString("port"))
