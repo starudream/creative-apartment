@@ -17,7 +17,6 @@ import (
 
 	"github.com/starudream/creative-apartment/api"
 	"github.com/starudream/creative-apartment/config"
-	"github.com/starudream/creative-apartment/dist"
 	"github.com/starudream/creative-apartment/internal/app"
 	"github.com/starudream/creative-apartment/internal/ibolt"
 	"github.com/starudream/creative-apartment/internal/ibot"
@@ -25,7 +24,6 @@ import (
 	"github.com/starudream/creative-apartment/internal/ierr"
 	"github.com/starudream/creative-apartment/internal/igin"
 	"github.com/starudream/creative-apartment/internal/ilog"
-	"github.com/starudream/creative-apartment/internal/iu"
 	"github.com/starudream/creative-apartment/internal/json"
 	"github.com/starudream/creative-apartment/route"
 )
@@ -48,31 +46,19 @@ func Execute() {
 }
 
 func initRouter(context.Context) error {
-	am := igin.Auth(viper.GetString("secret"))
+	secret := viper.GetString("secret")
 
 	igin.S().GET("/version", func(c *gin.Context) { c.String(http.StatusOK, config.FULL_VERSION) })
 
-	g := igin.S().Group("/api/v1").Use(igin.Logger(), am)
+	g := igin.S().Group("/api/v1").Use(igin.Logger(), igin.Auth(secret))
 	{
 		g.POST("customers", route.ListCustomers)
 		g.POST("house/data", route.GetHouseData)
 	}
 
-	igin.S().Use(igin.Serve("/", igin.StaticFile(dist.FS, ".", true)))
+	igin.S().Use(igin.Serve("/", igin.LocalFileSystem("dist"), func(c *gin.Context) { c.AbortWithStatusJSON(ierr.NotFound()) }))
+	igin.S().NoMethod(func(c *gin.Context) { c.AbortWithStatusJSON(ierr.NotAllowed()) })
 
-	igin.S().NoRoute(func(c *gin.Context) {
-		rp := strings.TrimPrefix(c.Request.URL.Path, "/")
-		if iu.SliceContains(dist.Files, rp) {
-			c.FileFromFS(rp, http.FS(dist.FS))
-		} else {
-			c.AbortWithStatusJSON(ierr.NotFound())
-		}
-	})
-	igin.S().NoMethod(func(c *gin.Context) {
-		c.AbortWithStatusJSON(ierr.NotAllowed())
-	})
-
-	log.Debug().Msgf("[http] load static files: %s", strings.Join(dist.Files, ", "))
 	return igin.Run(":" + viper.GetString("port"))
 }
 
