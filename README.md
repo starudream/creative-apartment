@@ -81,6 +81,10 @@ dingtalk:
 secret: "${SECRET}"
 ```
 
+## Screenshot
+
+![dingtalk](./docs/dingtalk.jpg)
+
 ## License
 
 [Apache License 2.0](./LICENSE)
