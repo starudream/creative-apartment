@@ -69,9 +69,13 @@ func runCron(context.Context) error {
 		log.Error().Msg("config not contain customers")
 	} else {
 		c := icron.New()
-		icron.WrapError(c.AddFunc("0 0 06 * * *", runCronCustomers))
+		// 抄表之前，如果有充值记录下充值后的数据
+		icron.WrapError(c.AddFunc("0 0 03 * * *", runCronCustomers))
+		// 抄表之后，记录下前一天的消耗量
+		icron.WrapError(c.AddFunc("0 0 04 * * *", runCronCustomers))
+		// 暂时预留，可能 Token 失效，修改之后重新获取
 		icron.WrapError(c.AddFunc("0 0 14 * * *", runCronCustomers))
-		icron.WrapError(c.AddFunc("0 0 22 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 24 * * *", runCronCustomers))
 		c.Run()
 	}
 	return nil
@@ -114,11 +118,6 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 					continue
 				}
 
-				if len(bucket0.Get([]byte(t0.Format("0102")))) > 0 {
-					log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("already stored house info")
-					continue
-				}
-
 				v0 := api.SimpleEquipmentInfo{}
 				v0.Surplus, _ = surplus.Float64()
 				v0.SurplusAmount, _ = surplusAmount.Float64()
@@ -126,6 +125,19 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 				v0.LastReadTime = t0
 
 				vs0[data.EquipmentType-1] = v0
+
+				if bs0 := bucket0.Get([]byte(t0.Format("0102"))); len(bs0) > 0 {
+					vt, err := json.UnmarshalTo[api.SimpleEquipmentInfo](bs0)
+					if !ilog.WrapError(err) {
+						continue
+					}
+					if vt.Surplus != v0.Surplus || vt.SurplusAmount != v0.SurplusAmount {
+						v0.LastRecord = &vt
+					} else {
+						log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("already stored house info and no change")
+						continue
+					}
+				}
 
 				if !ilog.WrapError(bucket0.Put([]byte(t0.Format("0102")), json.MustMarshal(v0)), "store") {
 					continue
@@ -139,12 +151,12 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 					datetime = t1.Format(config.DateFormat)
 				}
 
-				bs := bucket0.Get([]byte(t1.Format("0102")))
-				if len(bs) == 0 {
+				bs1 := bucket0.Get([]byte(t1.Format("0102")))
+				if len(bs1) == 0 {
 					continue
 				}
 
-				v1, err := json.UnmarshalTo[api.SimpleEquipmentInfo](bs)
+				v1, err := json.UnmarshalTo[api.SimpleEquipmentInfo](bs1)
 				if !ilog.WrapError(err) {
 					continue
 				}
@@ -156,17 +168,11 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 				}
 
 				a := v1.Surplus - v0.Surplus
-				for a < 0 {
-					a += config.RechargeAmount * v1.UnitPrice
-				}
 				if !ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")+"_a"), []byte(decimal.NewFromFloat(a).StringFixed(2))), "store") {
 					continue
 				}
 
 				b := v1.SurplusAmount - v0.SurplusAmount
-				for b < 0 {
-					b += config.RechargeAmount
-				}
 				if !ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")+"_b"), []byte(decimal.NewFromFloat(b).StringFixed(2))), "store") {
 					continue
 				}
