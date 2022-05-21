@@ -74,9 +74,9 @@ func runCron(context.Context) error {
 		// 抄表之后，记录下前一天的消耗量
 		icron.WrapError(c.AddFunc("0 0 04 * * *", runCronCustomers))
 		// 暂时预留，可能 Token 失效，修改之后重新获取
-		icron.WrapError(c.AddFunc("0 0 10 * * *", runCronCustomers))
-		icron.WrapError(c.AddFunc("0 0 16 * * *", runCronCustomers))
-		icron.WrapError(c.AddFunc("0 0 22 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 12 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 18 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 00 * * *", runCronCustomers))
 		c.Run()
 	}
 	return nil
@@ -146,6 +146,10 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 
 				log.Debug().Str("phone", customer.Phone).Int("type", data.EquipmentType).Time("time", t0).Msgf("store house info success")
 
+				if v0.LastRecord != nil {
+					continue
+				}
+
 				t1 := t0.AddDate(0, 0, -1)
 
 				if datetime == "" {
@@ -180,7 +184,7 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 
 				vs1[data.EquipmentType-1] = api.SimpleEquipmentInfo{Surplus: a, SurplusAmount: b, UnitPrice: v1.UnitPrice}
 			}
-			if house.CustomerPhone != "" && viper.GetString("dingtalk.token") != "" {
+			if house.CustomerPhone != "" && datetime != "" && viper.GetString("dingtalk.token") != "" {
 				sendHouseInfoMessage(house.CustomerPhone, datetime, vs0, vs1)
 			}
 		}
