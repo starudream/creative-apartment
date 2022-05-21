@@ -74,8 +74,9 @@ func runCron(context.Context) error {
 		// 抄表之后，记录下前一天的消耗量
 		icron.WrapError(c.AddFunc("0 0 04 * * *", runCronCustomers))
 		// 暂时预留，可能 Token 失效，修改之后重新获取
-		icron.WrapError(c.AddFunc("0 0 14 * * *", runCronCustomers))
-		icron.WrapError(c.AddFunc("0 0 24 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 10 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 16 * * *", runCronCustomers))
+		icron.WrapError(c.AddFunc("0 0 22 * * *", runCronCustomers))
 		c.Run()
 	}
 	return nil
