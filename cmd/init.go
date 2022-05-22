@@ -33,6 +33,9 @@ func init() {
 
 	rootCmd.PersistentFlags().StringP("secret", "", "", "(env: SCA_SECRET) http server login secret")
 	ierr.CheckErr(viper.BindPFlag("secret", rootCmd.PersistentFlags().Lookup("secret")))
+
+	rootCmd.PersistentFlags().BoolP("startup", "", false, "(env: SCA_STARTUP) execute jobs at startup")
+	ierr.CheckErr(viper.BindPFlag("startup", rootCmd.PersistentFlags().Lookup("startup")))
 }
 
 func initConfig() {
@@ -101,6 +104,8 @@ func initConfig() {
 	}
 
 	log.Info().Msgf("[cfg] login secret: %s", secret)
+
+	icfg.Done()
 }
 
 func initDB() {

@@ -9,6 +9,20 @@
 
 ## Usage
 
+```shell
+Usage:
+  creative-apartment [flags]
+
+Flags:
+      --debug           (env: SCA_DEBUG) show debug information
+  -h, --help            help for creative-apartment
+      --path string     (env: SCA_PATH) configuration file path
+      --port int        (env: SCA_PORT) http server port (default 8089)
+      --secret string   (env: SCA_SECRET) http server login secret
+      --startup         (env: SCA_STARTUP) execute jobs at startup
+  -v, --version         version for creative-apartment
+```
+
 ### Docker
 
 ![Version](https://img.shields.io/docker/v/starudream/creative-apartment?style=for-the-badge)
@@ -64,6 +78,7 @@ Each variable is preceded by a `SCA_` prefix
 | PATH            | STRING | -       | configuration file path  |
 | PORT            | INT    | 8089    | http server port         |
 | SECRET          | STRING | -       | http server login secret |
+| STARTUP         | BOOL   | FALSE   | execute jobs at startup  |
 | DINGTALK_TOKEN  | STRING | -       | dingtalk robot token     |
 | DINGTALK_SECRET | STRING | -       | dingtalk robot secret    |
 
@@ -73,11 +88,11 @@ Each variable is preceded by a `SCA_` prefix
 
 ```yaml
 customers:
-    -   phone: "${PHONE}"
-        token: "${ACCESS_TOKEN}"
+  - phone: "${PHONE}"
+    token: "${ACCESS_TOKEN}"
 dingtalk:
-    secret: "${DINGTALK_SECRET}"
-    token: "${DINGTALK_TOKEN}"
+  secret: "${DINGTALK_SECRET}"
+  token: "${DINGTALK_TOKEN}"
 secret: "${SECRET}"
 ```
 

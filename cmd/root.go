@@ -68,16 +68,20 @@ func runCron(context.Context) error {
 	if len(config.GetCustomers()) == 0 {
 		log.Error().Msg("config not contain customers")
 	} else {
-		c := icron.New()
-		// 抄表之前，如果有充值记录下充值后的数据
-		icron.WrapError(c.AddFunc("0 0 03 * * *", runCronCustomers))
-		// 抄表之后，记录下前一天的消耗量
-		icron.WrapError(c.AddFunc("0 0 04 * * *", runCronCustomers))
-		// 暂时预留，可能 Token 失效，修改之后重新获取
-		icron.WrapError(c.AddFunc("0 0 12 * * *", runCronCustomers))
-		icron.WrapError(c.AddFunc("0 0 18 * * *", runCronCustomers))
-		icron.WrapError(c.AddFunc("0 0 00 * * *", runCronCustomers))
-		c.Run()
+		go func() {
+			if viper.GetBool("startup") {
+				// 启动时运行一次
+				runCronCustomers()
+			}
+		}()
+		go func() {
+			c := icron.New()
+			// 抄表之前，如果有充值记录下充值后的数据
+			icron.WrapError(c.AddFunc("0 0 03 * * *", runCronCustomers))
+			// 抄表之后，记录下前一天的消耗量
+			icron.WrapError(c.AddFunc("0 0 04 * * *", runCronCustomers))
+			c.Run()
+		}()
 	}
 	return nil
 }
@@ -184,9 +188,7 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 
 				vs1[data.EquipmentType-1] = api.SimpleEquipmentInfo{Surplus: a, SurplusAmount: b, UnitPrice: v1.UnitPrice}
 			}
-			if house.CustomerPhone != "" && datetime != "" && viper.GetString("dingtalk.token") != "" {
-				sendHouseInfoMessage(house.CustomerPhone, datetime, vs0, vs1)
-			}
+			sendHouseInfoMessage(house.CustomerPhone, datetime, vs0, vs1)
 		}
 		ilog.WrapError(tx.Bucket([]byte("customer")).Put([]byte(customer.Phone), nil), "store")
 		return nil
@@ -194,6 +196,9 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 }
 
 func sendHouseInfoMessage(phone, datetime string, vs0, vs1 []api.SimpleEquipmentInfo) {
+	if phone == "" || datetime == "" || viper.GetString("dingtalk.token") == "" {
+		return
+	}
 	msg := strings.Builder{}
 	for i := 0; i < 3; i++ {
 		tag := ""

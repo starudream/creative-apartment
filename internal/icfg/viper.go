@@ -9,9 +9,21 @@ import (
 	"github.com/starudream/creative-apartment/internal/ierr"
 )
 
-var keys = []string{"secret", "customers", "dingtalk"}
+var (
+	keys = []string{"secret", "customers", "dingtalk"}
+
+	done bool
+)
+
+func Done() {
+	done = true
+}
 
 func Save() {
+	if !done {
+		return
+	}
+
 	ierr.CheckErr(os.MkdirAll(filepath.Dir(viper.ConfigFileUsed()), 0755))
 	nViper := viper.New()
 	for i := 0; i < len(keys); i++ {
