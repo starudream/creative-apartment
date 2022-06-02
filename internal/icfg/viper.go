@@ -3,6 +3,7 @@ package icfg
 import (
 	"os"
 	"path/filepath"
+	"sync/atomic"
 
 	"github.com/spf13/viper"
 
@@ -12,15 +13,15 @@ import (
 var (
 	keys = []string{"secret", "customers", "dingtalk"}
 
-	done bool
+	done int32
 )
 
 func Done() {
-	done = true
+	atomic.StoreInt32(&done, 1)
 }
 
 func Save() {
-	if !done {
+	if atomic.LoadInt32(&done) != 1 {
 		return
 	}
 

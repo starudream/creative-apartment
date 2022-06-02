@@ -8,13 +8,10 @@ import (
 
 	"github.com/starudream/creative-apartment/api"
 	"github.com/starudream/creative-apartment/config"
-	"github.com/starudream/creative-apartment/internal/itest"
 	"github.com/starudream/creative-apartment/internal/itime"
 )
 
 func TestStoreHouseInfo(t *testing.T) {
-	itest.Init()
-
 	customer := &config.Customer{Phone: "13312341234"}
 
 	var (

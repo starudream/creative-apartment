@@ -1,7 +1,10 @@
 package itest
 
 import (
+	"os"
 	"path/filepath"
+	"strings"
+	"testing"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -12,11 +15,13 @@ import (
 	"github.com/starudream/creative-apartment/internal/ios"
 )
 
-func Init() {
+func Init(m *testing.M) {
 	log.Logger = log.Output(ilog.NewConsoleWriter())
 
 	viper.SetEnvPrefix("sca")
+	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	viper.AutomaticEnv()
+
 	viper.SetDefault("debug", true)
 
 	path := viper.GetString("path")
@@ -32,4 +37,6 @@ func Init() {
 	}
 
 	ibolt.Init(filepath.Join(path, config.AppName+".bolt"))
+
+	os.Exit(m.Run())
 }

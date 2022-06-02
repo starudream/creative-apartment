@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	defer ierr.Recover(app.Stop, igin.Close, ibolt.Close, icfg.Save)
+	app.Recover(icfg.Save, ibolt.Close, igin.Close)
 
 	cmd.Execute()
 

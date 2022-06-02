@@ -9,6 +9,7 @@ import (
 var (
 	exec string
 	home string
+	pwd  string
 )
 
 func init() {
@@ -19,6 +20,9 @@ func init() {
 
 	home, err = os.UserHomeDir()
 	ierr.CheckErr(err)
+
+	pwd, err = os.Getwd()
+	ierr.CheckErr(err)
 }
 
 func Executable() string {
@@ -27,4 +31,8 @@ func Executable() string {
 
 func UserHomeDir() string {
 	return home
+}
+
+func PWD() string {
+	return pwd
 }

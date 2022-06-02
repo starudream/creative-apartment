@@ -1,4 +1,4 @@
-package ibot
+package cmd
 
 import (
 	"testing"

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +29,8 @@ func New() *gin.Engine {
 }
 
 var (
+	running int32
+
 	server *http.Server
 
 	handler *gin.Engine
@@ -45,11 +48,12 @@ func S() *gin.Engine {
 func Run(addr string) error {
 	server = &http.Server{Addr: addr, Handler: handler}
 	log.Info().Msgf("[http] listening on %s", addr)
+	atomic.StoreInt32(&running, 1)
 	return server.ListenAndServe()
 }
 
 func Close() {
-	if server == nil {
+	if atomic.LoadInt32(&running) != 1 {
 		return
 	}
 
