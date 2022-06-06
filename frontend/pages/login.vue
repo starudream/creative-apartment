@@ -20,30 +20,41 @@
 import { key } from "@/consts"
 
 export default {
-  data() {
-    return {
-      baseURL: "",
-      secret:  "",
-    }
+  computed: {
+    baseURL: {
+      get() {
+        return this.$store.state.baseURL
+      },
+      set(v) {
+        localStorage.setItem(key.baseURL, v)
+        this.$store.commit("setBaseURL", v)
+      },
+    },
+    secret:  {
+      get() {
+        return this.$store.state.secret
+      },
+      set(v) {
+        localStorage.setItem(key.secret, v)
+        this.$store.commit("setSecret", v)
+      },
+    },
   },
-  mounted() {
-    this.baseURL = localStorage.getItem(key.baseURL)
-    if (!this.baseURL) {
-      this.baseURL = location.origin
-    }
-    this.secret = localStorage.getItem(key.secret)
-  },
-  methods: {
+  methods:  {
     login() {
-      this.$axios.$get(this.baseURL + "/verifySecret", {params: {secret: this.secret}})
-        .then(() => {
+      this.$axios.$get(this.baseURL + "/verifySecret", {
+        params:       {secret: this.secret},
+        responseType: "json",
+      }).then((v) => {
+        if (v.code === 200) {
           this.$message.success("秘钥验证成功")
-          localStorage.setItem(key.secret, this.secret)
           this.$router.replace("/")
-        })
-        .catch(() => {
-          this.$message.error("秘钥错误")
-        })
+        } else {
+          this.$message.error("后端地址设置错误")
+        }
+      }).catch(() => {
+        this.$message.error("秘钥错误")
+      })
     },
     showSetting() {
       this.$prompt("", "自定义后端地址", {
@@ -64,14 +75,6 @@ export default {
           }
           this.baseURL = value
         }
-        this.$axios.$get(this.baseURL + "/version")
-          .then(() => {
-            this.$message.success("后端地址已设置为 " + this.baseURL)
-            localStorage.setItem(key.baseURL, this.baseURL)
-          })
-          .catch(() => {
-            this.$message.error("连接失败")
-          })
       })
     },
   },

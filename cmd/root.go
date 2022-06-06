@@ -50,7 +50,7 @@ func initRouter(context.Context) error {
 
 	igin.S().Use(igin.CORS())
 
-	igin.S().GET("/version", func(c *gin.Context) { c.String(http.StatusOK, config.FULL_VERSION) })
+	igin.S().GET("/version", version)
 	igin.S().GET("/verifySecret", verifySecret(secret))
 
 	g := igin.S().Group("/api/v1").Use(igin.Logger(), igin.Auth(secret))
@@ -65,13 +65,18 @@ func initRouter(context.Context) error {
 	return igin.Run(":" + viper.GetString("port"))
 }
 
+func version(c *gin.Context) {
+	md := ierr.MD{"version": config.VERSION, "bidtime": config.BIDTIME}
+	c.JSON(ierr.New().SetMetadata(md).OK())
+}
+
 func verifySecret(secret string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		if c.Query("secret") != secret {
 			c.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
-		c.Status(http.StatusOK)
+		c.JSON(ierr.OK())
 	}
 }
 
