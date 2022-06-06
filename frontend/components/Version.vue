@@ -17,5 +17,4 @@ export default {}
   text-align: center;
   line-height: 100px;
 }
-
 </style>

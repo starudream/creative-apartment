@@ -33,6 +33,9 @@ export default {
     }).then((x) => {
       if (x.code === 200) {
         this.$store.commit("setVersion", x.metadata.version)
+        if (!notLogin) {
+          this.$router.replace("/")
+        }
       }
     }).catch(() => {
       if (notLogin) {
