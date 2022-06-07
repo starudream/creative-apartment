@@ -36,27 +36,49 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    "@/plugins/element-ui",
+    // https://element.eleme.io
+    {src: "@/plugins/element-ui", ssr: true},
+    // https://github.com/ecomfe/vue-echarts
+    {src: "@/plugins/vue-echarts", ssr: false},
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
 
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
-  buildModules: [],
+  buildModules: [
+    // https://github.com/ecomfe/vue-echarts
+    "@nuxtjs/composition-api/module",
+  ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/axios
     "@nuxtjs/axios",
+    // https://github.com/nuxt-community/dayjs-module
+    "@nuxtjs/dayjs",
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
-    baseURL: "/",
+    baseURL:  "/",
+    progress: true,
   },
 
+  // Day.js: https://github.com/nuxt-community/dayjs-module
+  dayjs: {
+    defaultLocale:   "zh",
+    defaultTimeZone: "Asia/Shanghai",
+    plugins:         [
+      "utc",
+      "duration",
+      "timezone",
+      "relativeTime",
+    ],
+  },
+
+  // Loading: https://nuxtjs.org/docs/features/loading/
   loading: {
     color: "blue",
   },

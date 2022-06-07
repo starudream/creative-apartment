@@ -48,7 +48,7 @@ export default {
       }).then((v) => {
         if (v.code === 200) {
           this.$message.success("秘钥验证成功")
-          this.$router.replace("/")
+          location.href = process.env.path
         } else {
           this.$message.error("后端地址设置错误")
         }
@@ -67,7 +67,6 @@ export default {
       }).then(({value}) => {
         if (value) {
           if (!value.startsWith("http")) {
-            // noinspection HttpUrlsUsage
             value = "http://" + value
           }
           if (value.endsWith("/")) {
@@ -82,10 +81,6 @@ export default {
 </script>
 
 <style>
-body {
-  background-color: whitesmoke;
-}
-
 .form {
   position: absolute;
   top: 50%;
@@ -95,7 +90,7 @@ body {
 
 .setting {
   font-size: 30px;
-  position: absolute;
+  position: fixed;
   left: 0;
   bottom: 0;
   width: 100px;

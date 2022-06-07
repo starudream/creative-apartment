@@ -2,14 +2,10 @@
   <div class="version">{{ this.$store.state.version }}</div>
 </template>
 
-<script>
-export default {}
-</script>
-
 <style>
 .version {
   font-size: 14px;
-  position: absolute;
+  position: fixed;
   right: 0;
   bottom: 0;
   width: 200px;
