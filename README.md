@@ -25,7 +25,7 @@ Flags:
 
 ### Docker
 
-![Version](https://img.shields.io/docker/v/starudream/creative-apartment?style=for-the-badge)
+![Version](https://img.shields.io/docker/v/starudream/creative-apartment?sort=semver&style=for-the-badge)
 ![Size](https://img.shields.io/docker/image-size/starudream/creative-apartment/latest?style=for-the-badge)
 ![Pull](https://img.shields.io/docker/pulls/starudream/creative-apartment?style=for-the-badge)
 
