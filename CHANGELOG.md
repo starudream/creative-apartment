@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.6](https://github.com/starudream/creative-apartment/compare/v0.2.5...v0.2.6) (2022-06-08)
+
+
+### Features
+
+* add pr ignore path ([0ac277f](https://github.com/starudream/creative-apartment/commit/0ac277fc424c161a443b8efef227aa2219653502))
+
+
+### Bug Fixes
+
+* use pat install of github token ([08e1393](https://github.com/starudream/creative-apartment/commit/08e1393d87c6ff3fb0294e44be3dea807e911fe3))
+
 ## [0.2.5](https://github.com/starudream/creative-apartment/compare/v0.2.4...v0.2.5) (2022-06-08)
 
 
