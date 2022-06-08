@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5](https://github.com/starudream/creative-apartment/compare/v0.2.4...v0.2.5) (2022-06-08)
+
+
+### Bug Fixes
+
+* fix actions release docker ([56a0fcf](https://github.com/starudream/creative-apartment/commit/56a0fcf6d4702520fde4c6587eab24d18c1bcb05))
+
 ## [0.2.4](https://github.com/starudream/creative-apartment/compare/v0.2.3...v0.2.4) (2022-06-08)
 
 
