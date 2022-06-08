@@ -52,6 +52,7 @@ jobs:
         if: ${{ steps.prepare.outputs.release_created }}
         uses: softprops/action-gh-release@v1
         with:
+          token: ${{ secrets.PAT }}
           files: bin/*
           tag_name: ${{ steps.prepare.outputs.tag_name }}
           generate_release_notes: true
