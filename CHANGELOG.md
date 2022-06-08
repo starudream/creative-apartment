@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.4](https://github.com/starudream/creative-apartment/compare/v0.2.3...v0.2.4) (2022-06-08)
+
+
+### Bug Fixes
+
+* fix ignore release ([70e1dc6](https://github.com/starudream/creative-apartment/commit/70e1dc668acb5d7b933a68c7e807b69e4014889a))
+* fix release tag ([ca7c450](https://github.com/starudream/creative-apartment/commit/ca7c450e920bedfdb91987d588b0b8f938bde751))
+
 ## [0.2.3](https://github.com/starudream/creative-apartment/compare/v0.2.2...v0.2.3) (2022-06-08)
 
 
