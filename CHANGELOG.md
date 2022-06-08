@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/starudream/creative-apartment/compare/v0.2.6...v0.3.0) (2022-06-08)
+
+
+### Features
+
+* add actions token ([b52eeb8](https://github.com/starudream/creative-apartment/commit/b52eeb8e1682541f0a5fd44acc47cec76fd3a78a))
+
+
+### release
+
+* 0.3.0 ([68b92a0](https://github.com/starudream/creative-apartment/commit/68b92a0548d89b8123fc17fd3c244ba1ed602c5c))
+
 ## [0.2.6](https://github.com/starudream/creative-apartment/compare/v0.2.5...v0.2.6) (2022-06-08)
 
 
