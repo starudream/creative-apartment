@@ -19,9 +19,7 @@ export default {
     }
   },
   async mounted() {
-    console.log("-> init")
-
-    const notLogin = this.$route.path !== "/login"
+    const notLogin = this.$route.path.startsWith("/login")
 
     let baseURL = localStorage.getItem(key.baseURL)
     if (!baseURL) {
@@ -54,8 +52,6 @@ export default {
         }
       })
     }
-
-    console.log("<- init")
 
     this.done = true
   },
