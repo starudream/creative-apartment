@@ -58,6 +58,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: bin/*
-          tag_name: ${{ steps.release-please.outputs.tag_name }}
+          tag_name: ${{ steps.prepare.outputs.tag_name }}
           generate_release_notes: true
           fail_on_unmatched_files: true
