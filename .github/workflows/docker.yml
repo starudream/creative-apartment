@@ -1,8 +1,5 @@
 name: Docker
 
-permissions:
-  packages: write
-
 on:
   push:
     branches:
@@ -40,7 +37,7 @@ jobs:
         with:
           registry: ghcr.io
           username: starudream
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.PAT }}
       - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v4

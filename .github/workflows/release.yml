@@ -1,9 +1,5 @@
 name: Release
 
-permissions:
-  contents: write
-  pull-requests: write
-
 on:
   push:
     branches:
@@ -18,6 +14,7 @@ jobs:
         uses: google-github-actions/release-please-action@v3
         id: prepare
         with:
+          token: ${{ secrets.PAT }}
           release-type: go
           bump-minor-pre-major: true
           bump-patch-for-minor-pre-major: true
