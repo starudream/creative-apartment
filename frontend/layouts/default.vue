@@ -1,12 +1,16 @@
 <template>
-  <div v-if="done" class="container">
-    <Nuxt/>
+  <el-container v-if="done">
+    <el-main>
+      <Nuxt/>
+    </el-main>
+    <el-footer>
+      <Version/>
+      <div v-show="this.$store.state.isLogin" class="user">
+        <i class="el-icon-switch-button" @click.prevent="logout"></i>
+      </div>
+    </el-footer>
     <GitHub/>
-    <Version/>
-    <div v-show="this.$store.state.isLogin" class="user">
-      <i class="el-icon-switch-button" @click.prevent="logout"></i>
-    </div>
-  </div>
+  </el-container>
 </template>
 
 <script>
@@ -71,6 +75,11 @@ export default {
 </script>
 
 <style>
+body {
+  padding: 0;
+  margin: 0 0 100px;
+}
+
 .user {
   font-size: 30px;
   position: fixed;

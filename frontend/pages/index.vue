@@ -16,7 +16,7 @@
     </el-row>
     <el-row>
       <el-col :lg="{span:16,offset:4}" style="margin-top: 50px;">
-        <div style="height: 800px;">
+        <div style="height: 600px;">
           <client-only>
             <v-chart :option="chartOption"/>
           </client-only>
@@ -88,17 +88,26 @@ export default {
         ],
       },
       chartOption: {
+        grid:    {
+          left:         "5%",
+          right:        "5%",
+          top:          "120",
+          bottom:       "0",
+          containLabel: true,
+        },
         title:   {
           text: "用量统计",
-        },
-        tooltip: {
-          trigger: "axis",
+          left: "center",
+          top:  "0",
         },
         legend:  {
           data: ["电量", "电费", "水量", "水费"],
+          left: "center",
+          top:  "35",
         },
         toolbox: {
-          show:    true,
+          left:    "center",
+          top:     "70",
           feature: {
             dataView:    {
               readOnly: false,
@@ -111,6 +120,9 @@ export default {
             },
             restore:     {},
           },
+        },
+        tooltip: {
+          trigger: "axis",
         },
         xAxis:   {
           type:        "category",
