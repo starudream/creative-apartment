@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.1](https://github.com/starudream/creative-apartment/compare/v0.3.0...v0.3.1) (2022-06-08)
+
+
+### Features
+
+* add auth limit and lock ([2527d43](https://github.com/starudream/creative-apartment/commit/2527d43f8174d26feba0d2f764ff4708fefbba84))
+
+
+### Bug Fixes
+
+* fix unlimited redirects ([c6b7779](https://github.com/starudream/creative-apartment/commit/c6b7779cfe4982747530c5af077d3467b9cb7177))
+
+
+### Performance Improvements
+
+* perfect chart date ([56b18d2](https://github.com/starudream/creative-apartment/commit/56b18d24b787bc3abd65433fe5d53154021b9353))
+* perfect mobile style ([e6b6355](https://github.com/starudream/creative-apartment/commit/e6b6355f3895b5c94ca71f755e9939cc7309e2b7))
+
 ## [0.3.0](https://github.com/starudream/creative-apartment/compare/v0.2.6...v0.3.0) (2022-06-08)
 
 
