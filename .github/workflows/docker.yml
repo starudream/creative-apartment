@@ -7,10 +7,11 @@ on:
   push:
     branches:
       - master
-    tags:
-      - 'v*'
     paths-ignore:
       - CHANGELOG.md
+  release:
+    types:
+      - published
 
 jobs:
   build:
