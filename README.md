@@ -9,7 +9,7 @@
 
 ## Usage
 
-```shell
+```
 Usage:
   creative-apartment [flags]
 
@@ -46,6 +46,21 @@ docker run -d \
     starudream/creative-apartment
 ```
 
+```yaml
+  sca:
+    image: starudream/creative-apartment
+    container_name: creative-apartment
+    restart: always
+    ports:
+      - 8089:8089
+    volumes:
+      - /opt/docker/creative-apartment:/data
+    environment:
+      SCA_DEBUG: "true"
+      SCA_STARTUP: "true"
+      SCA_PATH: /data/creative-apartment.yaml
+```
+
 ## Configuration
 
 ### Before
@@ -57,6 +72,12 @@ docker run -d \
 所以最好采用的是抓包，使用 `BlackBox` `TrustMeAlready` `VNET` 工具，抓包获取 `access_token`。
 
 可以参考文章 [无 Root 抓包 HTTPS 请求](https://blog.starudream.cn/2022/05/09/android-packet-capture-without-root/)
+
+获取到的 `access_token` 只有 `30天` 有效期，而且安卓包内没有刷新机制，所以需要每隔 `30天` 重新获取一次。
+
+做自验证登录的话，因为每次都需要手机验证码所以会比较麻烦，暂时不会考虑了。
+
+请求包可查看 [获取验证码及登录](./docs/login.md) 这篇文档。
 
 ### Path
 
@@ -98,7 +119,13 @@ secret: "${SECRET}"
 
 ## Screenshot
 
+### 钉钉通知
+
 ![dingtalk](./docs/dingtalk.jpg)
+
+### 网页查询
+
+![dingtalk](./docs/web.png)
 
 ## License
 
