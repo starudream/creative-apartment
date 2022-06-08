@@ -32,32 +32,33 @@ export default {
     return {
       customers:   [],
       phone:       "",
-      today:       this.$dayjs().startOf("day"),
-      monday:      this.$dayjs().startOf("week").add(1, "day"),
+      yesterday:   this.$dayjs().startOf("day").add(-1, "day"),
+      day1:        this.$dayjs().startOf("day"),
+      week1:       this.$dayjs().startOf("week").add(1, "day"),
       month1:      this.$dayjs().startOf("month"),
       date:        [],
       dateOption:  {
         firstDayOfWeek: 1,
         disabledDate:   (date) => {
-          return date > new Date()
+          return date >= this.day1.toDate()
         },
         shortcuts:      [
           {
             text:    "本周",
             onClick: (picker) => {
-              picker.$emit("pick", [this.monday.toDate(), this.monday.add(6, "day").toDate()])
+              picker.$emit("pick", [this.week1.toDate(), this.week1.add(6, "day").toDate()])
             },
           },
           {
             text:    "上周",
             onClick: (picker) => {
-              picker.$emit("pick", [this.monday.add(-7, "day").toDate(), this.monday.add(-1, "day").toDate()])
+              picker.$emit("pick", [this.week1.add(-7, "day").toDate(), this.week1.add(-1, "day").toDate()])
             },
           },
           {
             text:    "近一周",
             onClick: (picker) => {
-              picker.$emit("pick", [this.today.add(-6, "day"), this.today])
+              picker.$emit("pick", [this.yesterday.add(-6, "day"), this.yesterday])
             },
           },
           {
@@ -75,13 +76,13 @@ export default {
           {
             text:    "近30天",
             onClick: (picker) => {
-              picker.$emit("pick", [this.today.add(-30, "day").toDate(), this.today])
+              picker.$emit("pick", [this.yesterday.add(-30, "day").toDate(), this.yesterday])
             },
           },
           {
             text:    "近90天",
             onClick: (picker) => {
-              picker.$emit("pick", [this.today.add(-90, "day").toDate(), this.today])
+              picker.$emit("pick", [this.yesterday.add(-90, "day").toDate(), this.yesterday])
             },
           },
         ],
@@ -147,8 +148,8 @@ export default {
   methods: {
     initDate() {
       this.date = [
-        this.$dayjs().add(-7, "day").toDate(),
-        this.$dayjs().toDate(),
+        this.yesterday.add(-6, "day").toDate(),
+        this.yesterday.toDate(),
       ]
     },
     changeDate() {
