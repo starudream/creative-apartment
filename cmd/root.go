@@ -110,6 +110,7 @@ func runCronCustomers() {
 		info := api.GetHouseInfo(customer.GetToken())
 		if info == nil {
 			log.Error().Str("phone", customer.Phone).Msgf("get house info error")
+			sendMessage("获取信息失败，请检查配置")
 		} else {
 			storeHouseInfo(customer, info)
 		}
@@ -211,6 +212,13 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 		ilog.WrapError(tx.Bucket([]byte("customer")).Put([]byte(customer.Phone), nil), "store")
 		return nil
 	})
+}
+
+func sendMessage(s string) {
+	if viper.GetString("dingtalk.token") == "" {
+		return
+	}
+	ierr.CheckErr(ibot.Dingtalk.SendMessage(s))
 }
 
 func sendHouseInfoMessage(phone, datetime string, vs0, vs1 []api.SimpleEquipmentInfo) {
