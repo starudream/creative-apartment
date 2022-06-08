@@ -3,13 +3,13 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
 	"github.com/rs/zerolog/log"
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
@@ -46,14 +46,14 @@ func Execute() {
 }
 
 func initRouter(context.Context) error {
-	secret := viper.GetString("secret")
+	auth := igin.Auth(viper.GetString("secret"), authLimiter())
 
 	igin.S().Use(igin.CORS())
 
 	igin.S().GET("/version", version)
-	igin.S().GET("/verifySecret", verifySecret(secret))
+	igin.S().GET("/verifySecret", auth)
 
-	g := igin.S().Group("/api/v1").Use(igin.Logger(), igin.Auth(secret))
+	g := igin.S().Group("/api/v1").Use(igin.Logger(), auth)
 	{
 		g.POST("customers", route.ListCustomers)
 		g.POST("house/data", route.GetHouseData)
@@ -65,19 +65,34 @@ func initRouter(context.Context) error {
 	return igin.Run(":" + viper.GetString("port"))
 }
 
+func authLimiter() igin.AuthLimitFunc {
+	max := 5
+	cc := cache.New(12*time.Hour, time.Minute)
+	return func(c *gin.Context) bool {
+		k := c.ClientIP()
+		x, _ := cc.IncrementInt(k, 1)
+		if x <= 0 {
+			x = 1
+			cc.SetDefault(k, x)
+		}
+		_, d, _ := cc.GetWithExpiration(k)
+		c.Header("X-RateLimit-Limit", strconv.Itoa(max))
+		if max-x < 0 {
+			c.Header("X-RateLimit-Remaining", "0")
+		} else {
+			c.Header("X-RateLimit-Remaining", strconv.Itoa(max-x))
+		}
+		c.Header("X-RateLimit-Reset", strconv.Itoa(int(d.Unix())))
+		if x > max {
+			c.AbortWithStatusJSON(ierr.Frequent())
+		}
+		return x <= max
+	}
+}
+
 func version(c *gin.Context) {
 	md := ierr.MD{"version": config.VERSION, "bidtime": config.BIDTIME}
 	c.JSON(ierr.New().SetMetadata(md).OK())
-}
-
-func verifySecret(secret string) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		if c.Query("secret") != secret {
-			c.AbortWithStatus(http.StatusBadRequest)
-			return
-		}
-		c.JSON(ierr.OK())
-	}
 }
 
 func runCron(context.Context) error {

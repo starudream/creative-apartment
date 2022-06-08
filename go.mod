@@ -13,6 +13,7 @@ require (
 	github.com/jinzhu/now v1.1.5
 	github.com/json-iterator/go v1.1.12
 	github.com/mattn/go-colorable v0.1.12
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/rs/zerolog v1.27.0
 	github.com/satori/go.uuid v1.2.0

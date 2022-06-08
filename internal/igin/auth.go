@@ -6,7 +6,9 @@ import (
 	"github.com/starudream/creative-apartment/internal/ierr"
 )
 
-func Auth(secret string) gin.HandlerFunc {
+type AuthLimitFunc func(c *gin.Context) bool
+
+func Auth(secret string, limit AuthLimitFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		auth := c.GetHeader("Authorization")
 		if auth == "" {
@@ -15,6 +17,11 @@ func Auth(secret string) gin.HandlerFunc {
 		}
 
 		if auth != secret {
+			if limit != nil {
+				if !limit(c) {
+					return
+				}
+			}
 			c.AbortWithStatusJSON(ierr.Forbidden())
 			return
 		}

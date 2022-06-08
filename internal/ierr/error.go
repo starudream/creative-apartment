@@ -136,6 +136,10 @@ func (e *Error) Conflict() (int, *Error) {
 	return e.Status(http.StatusConflict)
 }
 
+func (e *Error) Frequent() (int, *Error) {
+	return e.Status(http.StatusTooManyRequests)
+}
+
 func (e *Error) Internal() (int, *Error) {
 	return e.Status(http.StatusInternalServerError)
 }
@@ -170,4 +174,8 @@ func Conflict(v ...any) (int, *Error) {
 
 func Internal(v ...any) (int, *Error) {
 	return New(v...).Internal()
+}
+
+func Frequent(v ...any) (int, *Error) {
+	return New(v...).Frequent()
 }
