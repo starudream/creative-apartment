@@ -24,6 +24,7 @@ import (
 	"github.com/starudream/creative-apartment/internal/ierr"
 	"github.com/starudream/creative-apartment/internal/igin"
 	"github.com/starudream/creative-apartment/internal/ilog"
+	"github.com/starudream/creative-apartment/internal/iscript"
 	"github.com/starudream/creative-apartment/internal/json"
 	"github.com/starudream/creative-apartment/route"
 )
@@ -35,6 +36,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		app.Add(initRouter)
 		app.Add(runCron)
+		app.Add(iscript.FixHouseStatsOffset)
 	},
 }
 
@@ -211,12 +213,12 @@ func storeHouseInfo(customer *config.Customer, info *api.HouseInfoResp) {
 				}
 
 				a := v1.Surplus - v0.Surplus
-				if !ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")+"_a"), []byte(decimal.NewFromFloat(a).StringFixed(2))), "store") {
+				if !ilog.WrapError(bucket1.Put([]byte(t1.Format("0102")+"_a"), []byte(decimal.NewFromFloat(a).StringFixed(2))), "store") {
 					continue
 				}
 
 				b := v1.SurplusAmount - v0.SurplusAmount
-				if !ilog.WrapError(bucket1.Put([]byte(t0.Format("0102")+"_b"), []byte(decimal.NewFromFloat(b).StringFixed(2))), "store") {
+				if !ilog.WrapError(bucket1.Put([]byte(t1.Format("0102")+"_b"), []byte(decimal.NewFromFloat(b).StringFixed(2))), "store") {
 					continue
 				}
 
