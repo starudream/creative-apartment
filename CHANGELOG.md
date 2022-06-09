@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/starudream/creative-apartment/compare/v0.3.2...v0.4.0) (2022-06-09)
+
+
+### Bug Fixes
+
+* fix house stats offset ([1345d75](https://github.com/starudream/creative-apartment/commit/1345d7548523fca3641ba860f714a36a1382ef89))
+
+
+### release
+
+* 0.4.0 ([819fb0a](https://github.com/starudream/creative-apartment/commit/819fb0afbf35c9692339b019c5c48ace69facb84))
+
 ## [0.3.2](https://github.com/starudream/creative-apartment/compare/v0.3.1...v0.3.2) (2022-06-09)
 
 
