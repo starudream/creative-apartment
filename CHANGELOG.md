@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/starudream/creative-apartment/compare/v0.3.1...v0.3.2) (2022-06-09)
+
+
+### Bug Fixes
+
+* fix stats store key offset 1 day ([3297a75](https://github.com/starudream/creative-apartment/commit/3297a759bcdb7d06253a3ebfa5e7b6b390417e4c))
+
 ## [0.3.1](https://github.com/starudream/creative-apartment/compare/v0.3.0...v0.3.1) (2022-06-08)
 
 
