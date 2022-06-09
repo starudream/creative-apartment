@@ -95,6 +95,11 @@ func GetHouseStatsByYear(ctx context.Context, phone, year, smd, emd string) (map
 				cur := bucket.Cursor()
 				for k, v := cur.Seek([]byte(smd)); len(k) > 0 && bytes.Compare(k, []byte(emd)) <= 0; k, v = cur.Next() {
 					sk := year + "-" + string(k[0:2]) + "-" + string(k[2:4])
+					t, err := time.ParseInLocation(config.DateFormat, sk, time.Local)
+					if err != nil {
+						return err
+					}
+					sk = t.AddDate(0, 0, -1).Format(config.DateFormat)
 					vd, err := decimal.NewFromString(string(v))
 					if err != nil {
 						return err
