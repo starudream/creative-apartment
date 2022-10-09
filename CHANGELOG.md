@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/starudream/creative-apartment/compare/v0.4.0...v0.4.1) (2022-10-09)
+
+
+### Performance Improvements
+
+* perfect use go 1.19 ([a621de0](https://github.com/starudream/creative-apartment/commit/a621de0bf7fc8c15fc2bac4ff226d651dd303a3f))
+
 ## [0.4.0](https://github.com/starudream/creative-apartment/compare/v0.3.2...v0.4.0) (2022-06-09)
 
 
