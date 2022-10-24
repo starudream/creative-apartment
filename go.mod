@@ -3,7 +3,7 @@ module github.com/starudream/creative-apartment
 go 1.18
 
 require (
-	github.com/forgoer/openssl v1.3.0
+	github.com/forgoer/openssl v1.4.0
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.8.1
 	github.com/go-playground/locales v0.14.0
